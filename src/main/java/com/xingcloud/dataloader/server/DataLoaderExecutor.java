@@ -1,17 +1,13 @@
 package com.xingcloud.dataloader.server;
 
 
-import com.xingcloud.util.manager.MailManager;
-import com.xingcloud.util.manager.NetManager;
 import com.xingcloud.util.thread.PrefixedThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 核心任务线程，处理所有的5分钟任务

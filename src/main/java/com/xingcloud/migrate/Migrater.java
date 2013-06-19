@@ -6,7 +6,6 @@ import com.mongodb.DBObject;
 import com.xingcloud.dataloader.driver.MongodbDriver;
 import com.xingcloud.dataloader.lib.TimeIndex;
 import com.xingcloud.util.Log4jProperties;
-import com.xingcloud.util.manager.MailManager;
 import com.xingcloud.util.manager.NetManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -161,7 +160,7 @@ public class Migrater {
 
             MongodbDriver.getInstanceDB().getCollection("copy").insert(finishObject);
             if(!finish){
-                MailManager.getInstance().sendEmail(publicIp+"copy to long more than 10 min","info:"+type+" "+date+" "+index);
+//                MailManager.getInstance().sendEmail(publicIp+"copy to long more than 10 min","info:"+type+" "+date+" "+index);
             }
         }
         catch (Exception e){
