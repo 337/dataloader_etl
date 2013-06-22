@@ -96,7 +96,7 @@ public class ReaderTask implements Runnable {
         SeqUidCacheMap.getInstance().flushCacheToLocal(project);
 
       //每天检查一次该项目的缓存是否需要重置
-      if (index == 144)
+      if (index == 170)
         SeqUidCacheMap.getInstance().resetPidCache(project);
 
       LOG.info("finish reading and flushing events the project :" + project + " using " + this.timeTotal + " ms," +
