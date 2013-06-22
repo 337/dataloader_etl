@@ -126,66 +126,81 @@ public class CoinProcessTask implements Runnable{
             } catch (Exception e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
-        }else if(eventStr.contains("audit.consume.cost.coin")){
-
+        }else if(eventStr.contains("audit.consume.cost")){
             try {
-            long seqUid=SeqUidCacheMap.getInstance().getUidCache(project,uid);
-            long samplingSeqUid=UidMappingUtil.getInstance().decorateWithMD5(seqUid);
-            int coin_initial_status= CoinInitialStateCacheMap.getInstance().getVal(project,samplingSeqUid);
-            int coin_buy_val=CoinBuyCacheMap.getInstance().getVal(project,samplingSeqUid);
-            int coin_promotion_val=CoinPromotionCacheMap.getInstance().getVal(project,samplingSeqUid);
-            int cost_coin_buy_val=0,cost_coin_promotion_val=0;
-            double ratio=0.5;
-            if(coin_buy_val+coin_promotion_val>0)
-                ratio=((double)coin_buy_val)/(double)(coin_buy_val+coin_promotion_val);
-            String[] updateEvent=new String[Event.eventFieldLength];
-            updateEvent[0]="update";
-            JSONObject jsonObject=new JSONObject();
-            String[] consumeBuyCoinEvent=new String[Event.eventFieldLength];
-            String[] consumePromotionCoinEvent=new String[Event.eventFieldLength];
-            for (int i = 0; i < 3; i++) {
-                consumeBuyCoinEvent[i]=event[i];
-                consumePromotionCoinEvent[i]=event[i];
-            }
-            consumeBuyCoinEvent[3]="coinbuy";
-            consumePromotionCoinEvent[3]="coinpromotion";
-            //LOG.info(seqUid+" cost.coin,val:"+value);
-            if(value<=coin_initial_status){
-                //LOG.info("initial status "+coin_initial_status+" is bigger than cost "+value);
-                coin_initial_status-=value;
-                CoinInitialStateCacheMap.getInstance().put(project,samplingSeqUid,coin_initial_status);
-                jsonObject.put(INITIALTABLE,-value);
-            }
-            else {
-                if(coin_initial_status!=0){
-                    //LOG.info("initial status "+coin_initial_status+" is smaller than cost "+value);
-                    value-=coin_initial_status;
-                    CoinInitialStateCacheMap.getInstance().put(project,samplingSeqUid,0);
-                    jsonObject.put(INITIALTABLE,-coin_initial_status);
+                long seqUid=SeqUidCacheMap.getInstance().getUidCache(project,uid);
+                long samplingSeqUid=UidMappingUtil.getInstance().decorateWithMD5(seqUid);
+                int coin_initial_status= CoinInitialStateCacheMap.getInstance().getVal(project,samplingSeqUid);
+                int coin_buy_val=CoinBuyCacheMap.getInstance().getVal(project,samplingSeqUid);
+                int coin_promotion_val=CoinPromotionCacheMap.getInstance().getVal(project,samplingSeqUid);
+                int cost_coin_buy_val=0,cost_coin_promotion_val=0;
+                double ratio=0.5;
+                if(coin_buy_val>0 && coin_promotion_val>0)
+                    ratio=((double)coin_buy_val)/(double)(coin_buy_val+coin_promotion_val);
+                else if(coin_buy_val<0 && coin_promotion_val<0)
+                    ratio=1-((double)coin_buy_val)/(double)(coin_buy_val+coin_promotion_val);
+                else if(coin_buy_val<=0 && coin_promotion_val>0)
+                    ratio=0;
+                else if(coin_buy_val>0 && coin_promotion_val<=0)
+                    ratio=1;
+                String[] updateEvent=new String[Event.eventFieldLength];
+                updateEvent[0]="update";
+                JSONObject jsonObject=new JSONObject();
+                String[] consumeBuyCoinEvent=new String[Event.eventFieldLength];
+                String[] consumePromotionCoinEvent=new String[Event.eventFieldLength];
+                for (int i = 0; i < 2; i++) {
+                    consumeBuyCoinEvent[i]=event[i];
+                    consumePromotionCoinEvent[i]=event[i];
                 }
-                cost_coin_buy_val=(int)(value*ratio);
-                cost_coin_promotion_val=(int)(value-cost_coin_buy_val);
+                consumeBuyCoinEvent[2]="calcost";
+                consumePromotionCoinEvent[2]="calcost";
+                if(eventStr.contains("coin")){
+                    consumeBuyCoinEvent[3]="coinbuy";
+                    consumePromotionCoinEvent[3]="coinpromotion";
+                }else if(eventStr.contains("item")){
+                    consumeBuyCoinEvent[3]="itembuy";
+                    if(t.length>=5)consumeBuyCoinEvent[4]=event[4];
+                    consumePromotionCoinEvent[3]="itempromotion";
+                    if(t.length>=5)consumePromotionCoinEvent[4]=event[4];
+                }
 
-                coin_buy_val-=cost_coin_buy_val;
-                coin_promotion_val-=cost_coin_promotion_val;
-                CoinBuyCacheMap.getInstance().put(project,samplingSeqUid,coin_buy_val);
-                CoinPromotionCacheMap.getInstance().put(project,samplingSeqUid,coin_promotion_val);
+                if(value<=coin_initial_status){
+                    LOG.info("initial status "+coin_initial_status+" is bigger than cost "+value);
+                    coin_initial_status-=value;
+                    CoinInitialStateCacheMap.getInstance().put(project,samplingSeqUid,coin_initial_status);
+                    jsonObject.put(INITIALTABLE,-value);
+                    cost_coin_buy_val=(int)(value*(0.5));
+                    cost_coin_promotion_val=(int)(value-coin_buy_val);
+                }
+                else {
+                    if(coin_initial_status!=0){
+                        LOG.info("initial status "+coin_initial_status+" is smaller than cost "+value);
+                        value-=coin_initial_status;
+                        CoinInitialStateCacheMap.getInstance().put(project,samplingSeqUid,0);
+                        jsonObject.put(INITIALTABLE,-coin_initial_status);
+                    }else{
+                        LOG.info("initial status is 0. while cost is "+value);
+                    }
+                    cost_coin_buy_val=(int)(value*ratio);
+                    cost_coin_promotion_val=(int)(value-cost_coin_buy_val);
 
-                //cost_coin_promotion_val=(int)(value*(1-ratio));
-                result.add(new Event(uid,consumeBuyCoinEvent,cost_coin_buy_val,ts,json));
-                result.add(new Event(uid,consumePromotionCoinEvent,cost_coin_promotion_val,ts,json));
-                //coin_buy_val-=cost_coin_buy_val;
-                //coin_promotion_val-=cost_coin_promotion_val;
-                jsonObject.put("coin_buy",-cost_coin_buy_val);
-                jsonObject.put("coin_promotion",-cost_coin_promotion_val);
-            }
+                    coin_buy_val-=cost_coin_buy_val;
+                    coin_promotion_val-=cost_coin_promotion_val;
+                    CoinBuyCacheMap.getInstance().put(project,samplingSeqUid,coin_buy_val);
+                    CoinPromotionCacheMap.getInstance().put(project,samplingSeqUid,coin_promotion_val);
+                    //cost_coin_promotion_val=(int)(value*(1-ratio));
+                    //coin_buy_val-=cost_coin_buy_val;
+                    //coin_promotion_val-=cost_coin_promotion_val;
+                    jsonObject.put("coin_buy",-cost_coin_buy_val);
+                    jsonObject.put("coin_promotion",-cost_coin_promotion_val);
+                }
+
+            result.add(new Event(uid,consumeBuyCoinEvent,cost_coin_buy_val,ts,json));
+            result.add(new Event(uid,consumePromotionCoinEvent,cost_coin_promotion_val,ts,json));
             json=jsonObject.toString();
+            LOG.info(json);
             result.add(new Event(uid,updateEvent,value,ts,json));
 
-            //LOG.info(seqUid+" cost.coinbuy,val:"+cost_coin_buy_val);
-            //LOG.info(seqUid+" cost.coinpromotion,val:"+cost_coin_promotion_val);
-            //LOG.info(seqUid+" coin_buy,val:"+coin_buy_val);
-            //LOG.info(seqUid+" coin_promotion,val:"+coin_promotion_val);
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
