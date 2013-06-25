@@ -53,6 +53,7 @@ public class UserPropertyBitmaps {
     permittedProperties.add(User.ref2Field);
     permittedProperties.add(User.ref3Field);
     permittedProperties.add(User.ref4Field);
+    permittedProperties.add(User.geoipField);
 
 
   }

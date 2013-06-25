@@ -76,20 +76,34 @@ public class GeoIPCountryWhois {
   }
 
   public static void main(String[] args) {
-    String AUCountry = GeoIPCountryWhois.getInstance().getCountry(16777216l);
+    if (args.length != 0) {
+      for (String arg : args) {
+        System.out.println(arg);
+        String[] ipItems = arg.split("\\.");
+        long ipNumber = Long.valueOf(ipItems[0]) * 256 * 256 * 256 + Long.valueOf(ipItems[1])
+                * 256 * 256 + Long.valueOf(ipItems[2]) * 256 + Long.valueOf(ipItems[3]);
+        System.out.println(arg + "\t" + ipNumber + "\t" + GeoIPCountryWhois.getInstance().getCountry(ipNumber));
+      }
+    } else {
+      String AUCountry = GeoIPCountryWhois.getInstance().getCountry(1180673756);
 
-    if (!AUCountry.equals("AU"))
-      System.out.println("error ip 16777216,should be AU ,but is " + AUCountry);
+      if (!AUCountry.equals("AU"))
+        System.out.println("error ip 16777216,should be AU ,but is " + AUCountry);
 
-    String CNCountry = GeoIPCountryWhois.getInstance().getCountry(16777472l);
+      String CNCountry = GeoIPCountryWhois.getInstance().getCountry(16777472l);
 
-    if (!CNCountry.equals("CN"))
-      System.out.println("error ip 16777472,should be CN ,but is " + CNCountry);
+      if (!CNCountry.equals("CN"))
+        System.out.println("error ip 16777472,should be CN ,but is " + CNCountry);
 
-    String THCountry = GeoIPCountryWhois.getInstance().getCountry(16819984l);
+      String THCountry = GeoIPCountryWhois.getInstance().getCountry(16819984l);
 
-    if (!THCountry.equals("TH"))
-      System.out.println("error ip 16819984,should be TH ,but is " + THCountry);
+      if (!THCountry.equals("TH"))
+        System.out.println("error ip 16819984,should be TH ,but is " + THCountry);
+
+      System.out.println(GeoIPCountryWhois.getInstance().getCountry(1180673756l));
+
+    }
+
 
   }
 

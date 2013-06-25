@@ -118,6 +118,8 @@ public class User {
 
   static public final String nationField = "nation";
 
+  static public final String geoipField = "geoip";
+
   static private final String[] refFieldsArray = {refField, ref0Field, ref1Field, ref2Field, ref3Field, ref4Field};
   static public final List<String> refFields = Arrays.asList(refFieldsArray);
 
