@@ -94,6 +94,12 @@
             <artifactId>hppc</artifactId>
             <version>0.4.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.10</version>
+        </dependency>
+
 
 
         <!---xa third-party libs -->
@@ -129,11 +135,6 @@
         <dependency>
             <groupId>com.xingcloud.forexutil</groupId>
             <artifactId>xa.forex.getter</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml.snakeyaml</groupId>
-            <artifactId>Yaml</artifactId>
             <version>1.0.0</version>
         </dependency>
 
