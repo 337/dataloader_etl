@@ -6,7 +6,7 @@ time=`date +%Y-%m-%d,%H:%M:%S`
 
 workDir=/home/hadoop/xa
 logDir=${workDir}/log
-runJar=${workDir}/yangborunJar
+runJar=${workDir}/runJar
 
 jar="dataloader_etl_testCoin.jar";
 
