@@ -200,7 +200,7 @@ public class CoinProcessTask implements Runnable{
                     jsonObject.put("coin_buy",-change_coin_buy);
                     jsonObject.put("coin_promotion",-change_coin_promotion);
                 }
-	    LOG.info(uid+" ratio:"+ratio);
+	    LOG.info(uid+" coinratio:"+ratio);
             LOG.info(uid+" calcost.coinbuy: "+cost_coin_buy_val);
             LOG.info(uid+" calcost.coinpromotion: "+cost_coin_promotion_val);
 	    LOG.info(uid+" cost.coin: "+value);
