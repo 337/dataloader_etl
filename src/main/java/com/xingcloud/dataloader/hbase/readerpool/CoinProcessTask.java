@@ -170,8 +170,8 @@ public class CoinProcessTask implements Runnable{
                     coin_initial_status-=value;
                     CoinInitialStateCacheMap.getInstance().put(project,samplingSeqUid,coin_initial_status);
                     jsonObject.put(INITIALTABLE,-value);
-                    cost_coin_buy_val=(int)(value*(0.5));
-                    cost_coin_promotion_val=(int)(value-coin_buy_val);
+                    cost_coin_buy_val=(int)(value*ratio);
+                    cost_coin_promotion_val=(int)(value-cost_coin_buy_val);
                 }
                 else {
                     if(coin_initial_status!=0){
@@ -200,7 +200,10 @@ public class CoinProcessTask implements Runnable{
                     jsonObject.put("coin_buy",-change_coin_buy);
                     jsonObject.put("coin_promotion",-change_coin_promotion);
                 }
-
+	    LOG.info(uid+" ratio:"+ratio);
+            LOG.info(uid+" calcost.coinbuy: "+cost_coin_buy_val);
+            LOG.info(uid+" calcost.coinpromotion: "+cost_coin_promotion_val);
+	    LOG.info(uid+" cost.coin: "+value);
             result.add(new Event(uid,consumeBuyCoinEvent,cost_coin_buy_val,ts,json));
             result.add(new Event(uid,consumePromotionCoinEvent,cost_coin_promotion_val,ts,json));
             json=jsonObject.toString();
