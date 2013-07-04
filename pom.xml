@@ -20,30 +20,24 @@
             <url>http://xamavenrepo:8044/archiva/repository/internal</url>
             <layout>default</layout>
         </repository>
+        <repository>
+            <id>cloudera</id>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+        </repository>
     </repositories>
 
     <dependencies>
-
+        <!--hbase & hbase-client  -->
         <dependency>
-            <groupId>hadoop-core</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>0.20</version>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>2.0.0-cdh4.3.0</version>
         </dependency>
 
         <dependency>
-            <groupId>hadoop-lzo</groupId>
-            <artifactId>hadoop-lzo</artifactId>
-            <version>0.4.15</version>
-        </dependency>
-        <dependency>
-            <groupId>hbase</groupId>
-            <artifactId>hbase</artifactId>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-0.94.6-hadoop-2.0</artifactId>
             <version>0.94.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-            <version>3.4.3</version>
         </dependency>
 
         <!-- db dependencies -->
@@ -52,8 +46,6 @@
             <artifactId>commons-dbcp</artifactId>
             <version>1.4</version>
         </dependency>
-
-
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
@@ -71,110 +63,50 @@
             <version>5.1.18</version>
         </dependency>
 
-        <!-- json dependencies -->
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>1.7.6.jar</artifactId>
-            <version>1.7.6</version>
-        </dependency>
 
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.8.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.1</version>
-        </dependency>
+        <!-- json dependencies -->
         <dependency>
             <groupId>net.sf.ezmorph</groupId>
             <artifactId>ezmorph</artifactId>
             <version>1.0.6</version>
         </dependency>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>1.5</version>
-        </dependency>
-        <dependency>
             <groupId>net.sf.json-lib</groupId>
             <artifactId>json-lib</artifactId>
             <version>2.4</version>
+            <classifier>jdk15</classifier>
         </dependency>
-
-
-
-
-
-
-
-        <!-- log dependencies -->
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.6.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.4</version>
-        </dependency>
-
+      	<dependency>
+        	<groupId>junit</groupId>
+        	<artifactId>junit</artifactId>
+        	<version>4.11</version>
+			<scope>test</scope>
+      	</dependency>
 
         <!-- utils dependencies -->
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>2.4.0a</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.thrift</groupId>
             <artifactId>libthrift</artifactId>
             <version>0.8.0</version>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>12.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop.thirdparty</groupId>
-            <artifactId>guava</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.carrotsearch</groupId>
             <artifactId>hppc</artifactId>
             <version>0.4.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.10</version>
+        </dependency>
+
+
 
         <!---xa third-party libs -->
         <dependency>
             <groupId>com.xingcloud</groupId>
             <artifactId>dbutil</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
         </dependency>
 
         <dependency>
@@ -203,11 +135,6 @@
         <dependency>
             <groupId>com.xingcloud.forexutil</groupId>
             <artifactId>xa.forex.getter</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml.snakeyaml</groupId>
-            <artifactId>Yaml</artifactId>
             <version>1.0.0</version>
         </dependency>
 

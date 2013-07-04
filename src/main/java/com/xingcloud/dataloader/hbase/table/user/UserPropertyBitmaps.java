@@ -30,6 +30,7 @@ public class UserPropertyBitmaps {
     permittedProjects.add("citylife");
     permittedProjects.add("happyranch");
     permittedProjects.add("happyfarmer");
+    permittedProjects.add("v9-sof");
     permittedProjects.add("ddt");
     permittedProjects.add("sof-dsk");
     permittedProjects.add("sof-newgdp");
