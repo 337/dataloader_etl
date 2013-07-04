@@ -134,6 +134,7 @@ public class CoinProcessTask implements Runnable{
                 int coin_buy_val=CoinBuyCacheMap.getInstance().getVal(project,samplingSeqUid);
                 int coin_promotion_val=CoinPromotionCacheMap.getInstance().getVal(project,samplingSeqUid);
                 int cost_coin_buy_val=0,cost_coin_promotion_val=0;
+                long change_coin_buy=0,change_coin_promotion=0;
                 double ratio=0.5;
                 if(coin_buy_val>0 && coin_promotion_val>0)
                     ratio=((double)coin_buy_val)/(double)(coin_buy_val+coin_promotion_val);
@@ -175,24 +176,29 @@ public class CoinProcessTask implements Runnable{
                 else {
                     if(coin_initial_status!=0){
                         LOG.info("initial status "+coin_initial_status+" is smaller than cost "+value);
-                        value-=coin_initial_status;
+                        cost_coin_buy_val=(int)(value*ratio);
+                        cost_coin_promotion_val=(int)(value-cost_coin_buy_val);
+                        change_coin_buy=(long)(cost_coin_buy_val-ratio*coin_initial_status);
+                        change_coin_promotion=(long)(cost_coin_promotion_val-(1-ratio)*coin_initial_status);
                         CoinInitialStateCacheMap.getInstance().put(project,samplingSeqUid,0);
                         jsonObject.put(INITIALTABLE,-coin_initial_status);
-                    }else{
-                        LOG.info("initial status is 0. while cost is "+value);
                     }
-                    cost_coin_buy_val=(int)(value*ratio);
-                    cost_coin_promotion_val=(int)(value-cost_coin_buy_val);
-
-                    coin_buy_val-=cost_coin_buy_val;
-                    coin_promotion_val-=cost_coin_promotion_val;
+                    else{
+                        LOG.info("initial status is 0. while cost is "+value);
+                        cost_coin_buy_val=(int)(value*ratio);
+                        cost_coin_promotion_val=(int)(value-cost_coin_buy_val);
+                        change_coin_buy=(long)cost_coin_buy_val;
+                        change_coin_promotion=(long)cost_coin_promotion_val;
+                    }
+                    coin_buy_val-=change_coin_buy;
+                    coin_promotion_val-=change_coin_promotion;
                     CoinBuyCacheMap.getInstance().put(project,samplingSeqUid,coin_buy_val);
                     CoinPromotionCacheMap.getInstance().put(project,samplingSeqUid,coin_promotion_val);
                     //cost_coin_promotion_val=(int)(value*(1-ratio));
                     //coin_buy_val-=cost_coin_buy_val;
                     //coin_promotion_val-=cost_coin_promotion_val;
-                    jsonObject.put("coin_buy",-cost_coin_buy_val);
-                    jsonObject.put("coin_promotion",-cost_coin_promotion_val);
+                    jsonObject.put("coin_buy",-change_coin_buy);
+                    jsonObject.put("coin_promotion",-change_coin_promotion);
                 }
 
             result.add(new Event(uid,consumeBuyCoinEvent,cost_coin_buy_val,ts,json));
