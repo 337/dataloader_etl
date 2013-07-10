@@ -181,7 +181,11 @@ public class LogParser {
       //pay.visit事件和pay.visitc事件都转入新版
       //导致和pay事件（原pay.complete)冲突                                                 1
       //所以转pay.visit为pay_platform.visit
-      if (t[0].equals("pay")) t[0] = "pay_platform";
+      if(t.length >= 2){
+        if(t[0].equals("pay") && (t[1].equals("visit") || t[1].equals("visitc")))
+          t[0] = "pay_platform";
+      }
+//      if (t[0].equals("pay") && (t[])) t[0] = "pay_platform";
       for (int i = 0; i < t.length && i < Event.eventFieldLength; i++) {
         event[i] = t[i];
       }

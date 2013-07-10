@@ -76,6 +76,43 @@ public class GeoIPCountryWhois {
   }
 
   public static void main(String[] args) {
+
+
+    long[] ipNumbers = new long[]{1093733961l,
+            1093734036l,
+            1168431354l,
+            1279880290l,
+            167772171l,
+            167772177l,
+            167772199l,
+            167772201l,
+            167772202l,
+            167772233l,
+            167783543l,
+            167838194l,
+            168112666l,
+            168112671l,
+            168112691l,
+            168112795l,
+            168112799l,
+            168248997l,
+            171050388l,
+            171804961l,
+            180748321l,
+            1934479720l,
+            2684421275l,
+            2886729731l,
+            2886735458l,
+            2886771350l,
+            2887057677l,
+            2887778049l,
+            2918571304l,
+            3093247766l,
+            3635511712l,
+            608881523l};
+    for(long ipNumber:ipNumbers)
+    System.out.println(GeoIPCountryWhois.getInstance().getCountry(ipNumber));
+
     if (args.length != 0) {
       for (String arg : args) {
         System.out.println(arg);
