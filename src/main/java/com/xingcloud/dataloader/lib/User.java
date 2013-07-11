@@ -21,6 +21,7 @@ public class User {
 
   private long seqUid;
   private long samplingSeqUid;
+  private long timestamp;
 
 
   public Map<String, Object> property = new HashMap<String, Object>();
@@ -34,9 +35,14 @@ public class User {
     return lower.equals(specialUid1) || lower.equals(specialUid2);
   }
 
-  public User(long seqUid) {
+  public User(long seqUid,long timestamp) {
     this.seqUid = seqUid;
     this.samplingSeqUid = UidMappingUtil.getInstance().decorateWithMD5(seqUid);
+    this.timestamp = timestamp;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
   }
 
   //    public  Object getProperty(String key){
@@ -246,6 +252,8 @@ public class User {
     stringBuilder.append(seqUid);
     stringBuilder.append("\t");
     stringBuilder.append(JSONObject.fromObject(property).toString());
+    stringBuilder.append("\t") ;
+    stringBuilder.append(timestamp);
     return stringBuilder.toString();
   }
 

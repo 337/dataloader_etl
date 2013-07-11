@@ -82,48 +82,25 @@ public class UserProxy {
         User tempUser = null;
         if (event.getEvent().startsWith("visit.")) {
             long seqUid = getUserSeqUid(event);
-            tempUser = getUser(seqUid);
+            tempUser = getUser(seqUid,event.getTimestamp());
             //如果为visit事件，更新注册时间和最后登陆时间
             User.updatePropertyIntoUser(project, tempUser, projectPropertyCache.getUserPro(User.registerField),
                     User.registerField, Common.getLongPresentByTimestamp(event.getTimestamp()));
             User.updatePropertyIntoUser(project, tempUser, projectPropertyCache.getUserPro(User.lastLoginTimeField),
                     User.lastLoginTimeField, Common.getLongPresentByTimestamp(event.getTimestamp()));
-                //gametime不再更新
-                //如果lastlogintime需要更新，则检查gametime
-//                ShardedJedis visitTodayUidsJedis = null;
-//                try {
-//                    visitTodayUidsJedis = RedisShardedPoolResourceManager.getInstance().getCache(visitRedisIndex);
-//                    String key = project + visitJedisKeyPart +
-//                            String.valueOf(Common.getLongPresentByTimestamp(event.getTimestamp())).substring(0, dateSubPos);
-//                    long result = visitTodayUidsJedis.sadd(key, String.valueOf(seqUid));
-//                    if (result == 1) {
-//                        visitTodayUidsJedis.expire(key, expireSeconds);
-//                        User.updatePropertyIntoUser(project, tempUser, projectPropertyCache.getUserPro(User.gameTimeField),
-//                                User.gameTimeField, 1);
-//                    }
-//                } catch (Exception e) {
-//                    LOG.warn(project + " add Event:" + e.getMessage());
-//                    RedisShardedPoolResourceManager.getInstance().returnBrokenResource(visitTodayUidsJedis);
-//                    visitTodayUidsJedis = null;
-//                } finally {
-//                    RedisShardedPoolResourceManager.getInstance().returnResource(visitTodayUidsJedis);
-//                }
-
         } else if (event.getEvent().startsWith("pay.gross.") || event.getEvent().equals("pay.")) {
             long seqUid = getUserSeqUid(event);
-            tempUser = getUser(seqUid);
+            tempUser = getUser(seqUid,event.getTimestamp());
             //如果为pay事件，更新首次支付时间和最后支付时间，支付
             User.updatePropertyIntoUser(project, tempUser, projectPropertyCache.getUserPro(User.firstPayTimeField),
                     User.firstPayTimeField, Common.getLongPresentByTimestamp(event.getTimestamp()));
             User.updatePropertyIntoUser(project, tempUser, projectPropertyCache.getUserPro(User.lastPayTimeField),
                     User.lastPayTimeField, Common.getLongPresentByTimestamp(event.getTimestamp()));
-
             User.updatePropertyIntoUser(project, tempUser, projectPropertyCache.getUserPro(User.payAmountField),
                     User.payAmountField, event.getValue());
         } else if (event.getEvent().equals("update.")) {
             long seqUid = getUserSeqUid(event);
-            tempUser = getUser(seqUid);
-
+            tempUser = getUser(seqUid,event.getTimestamp());
             try {
                 JSONObject jsonObject = JSONObject.fromObject(event.getJson());
                 for (Object key : jsonObject.keySet()) {
@@ -131,7 +108,6 @@ public class UserProxy {
                     String userPropertyName = (String) key;
                     if (projectPropertyCache.getUserPro(userPropertyName) == null)
                         continue;
-
                     User.updatePropertyIntoUser(project, tempUser, projectPropertyCache.getUserPro(userPropertyName),
                             userPropertyName, jsonObject.get(userPropertyName));
                 }
@@ -156,10 +132,10 @@ public class UserProxy {
      * @param seqUid 根据userMap获取对应的用户
      * @return 返回要更新的属性的user
      */
-    private User getUser(long seqUid) {
+    private User getUser(long seqUid,long timestamp) {
         User value = userMap.get(seqUid);
         if (value == null) {
-            value = new User(seqUid);
+            value = new User(seqUid,timestamp);
             userMap.put(seqUid, value);
         }
         return value;
