@@ -49,8 +49,12 @@ public class RefBitMapRebuild {
   }
 
   private void rebuildSixtyDaysActiveUsersFromMySQL(String project, String date) {
-
     UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.refField);
+    dumpSixtyDaysActiveUsersToLocal(project, date);
+    rebuildSixtyDaysActiveUsersFromLocalFile(project);
+  }
+
+  private void dumpSixtyDaysActiveUsersToLocal(String project, String date) {
     // load 60 active users from mysql to localfile.
     String[] nodes = UidMappingUtil.getInstance().nodes().toArray(new String[UidMappingUtil.getInstance().nodes()
             .size()]);
@@ -88,7 +92,7 @@ public class RefBitMapRebuild {
           }
       }
     }
-    rebuildSixtyDaysActiveUsersFromLocalFile(project);
+
   }
 
   private void rebuildSixtyDaysActiveUsersFromLocalFile(String project) {
@@ -178,8 +182,12 @@ public class RefBitMapRebuild {
         } finally {
           RedisShardedPoolResourceManager.getInstance().returnResource(shardedJedis);
         }
-        System.out.println(pids);
-
+        long currentTime = System.currentTimeMillis();
+        String nowDate = args[1];
+        for (String pid : pids) {
+          getInstance().dumpSixtyDaysActiveUsersToLocal(pid.replace("uid.check.", ""), nowDate);
+        }
+        System.out.println("all finished.using " + (System.currentTimeMillis() - currentTime) / 1000 + "s.");
       }
     }
 
