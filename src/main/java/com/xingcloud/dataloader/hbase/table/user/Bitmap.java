@@ -42,6 +42,7 @@ public class Bitmap {
 
       int newlength = (int) ((lower - newlower) >> 3) + bits.length;
       if (newlength > MAX_LENGTH) {
+//        System.out.println("bitmap overflow.newLength is:"+newlength+" id:"+id+"lower is "+lower);
         return;
       }
       byte newbits[] = new byte[newlength];
@@ -57,8 +58,9 @@ public class Bitmap {
     } else if (id >= lower + (bits.length << 3)) {
       //upper expand
       int newlength = (int) (((id - lower) >> 3) + 1);
-      newlength = newlength > bits.length * 2 ? newlength : bits.length * 2;
+      newlength = newlength > bits.length * 2 ? newlength : bits.length * 2 > MAX_LENGTH ? newlength: bits.length * 2;
       if (newlength > MAX_LENGTH) {
+//        System.out.println("bitmap overflow.newLength is:"+newlength);
         return;
       }
       byte newbits[] = new byte[newlength];

@@ -46,11 +46,11 @@ public class RefBitMapRebuild {
     UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.refField);
     if (ignoreProjects.contains(project)) return;
     if (index == Constants.FIRST_TASK_NUM) {
-      LOG.info("rebuild " + project + " SixtyDaysActiveUsers from mysql.");
+//      LOG.info("rebuild " + project + " SixtyDaysActiveUsers from mysql.");
       rebuildSixtyDaysActiveUsersFromMySQL(project, date);
     } else {
       if (UserPropertyBitmaps.getInstance().ifPropertyNull(project, User.refField)) {
-        LOG.info("rebuild " + project + " SixtyDaysActiveUsers from localfile.");
+//        LOG.info("rebuild " + project + " SixtyDaysActiveUsers from localfile.");
         rebuildSixtyDaysActiveUsersFromLocalFile(project);
       }
     }
