@@ -2,12 +2,19 @@ package com.xingcloud.dataloader.lib;
 
 import com.xingcloud.dataloader.hbase.table.user.UserPropertyBitmaps;
 import com.xingcloud.util.Constants;
+import com.xingcloud.util.ProjectInfo;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.*;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * User: IvyTang
@@ -133,21 +140,48 @@ public class RefBitMapRebuild {
   }
 
 
-  public static void main(String[] args) throws InterruptedException {
-    getInstance().rebuildSixtyDays("sof-newgdp", "20130715", 0);
-
-//    System.out.println("begin rebuild from local file...");
-//    System.gc();
-//
-//
-//    getInstance().rebuildSixtyDays("sof-newgdp","20130715",4);
-//
-//    System.out.println("rebuild from local file completed.");
-//    System.gc();
-//    Thread.sleep(10*1000);
-
+  public static void main(String[] args) throws InterruptedException, IOException, URISyntaxException {
+    if (args.length != 0) {
+      if (args[0].equals("test")) {
+        //    getInstance().rebuildSixtyDays("sof-newgdp", "20130715", 0);
+        getInstance().rebuildSixtyDays("sof-newgdp", "20130715", 4);
+        int[] innerUids = new int[]{6781865,
+                6617775,
+                6843889,
+                6379767,
+                6607213,
+                2025759,
+                6881009,
+                3733721,
+                6814597,
+                6905067, 8978181};
+        for (int innerUid : innerUids) {
+          if (!UserPropertyBitmaps.getInstance().isPropertyHit("sof-newgdp", 8978181, User.ref0Field))
+            System.out.println("error " + innerUid);
+        }
+      } else if(args[0].equals("init")){
+        Set<String> projectSet = new HashSet<String>();
+        String hdfsRoot = "hdfs://namenode.xingcloud.com:19000";
+        String pathRoot = hdfsRoot + "/user/hadoop/analytics/";
+        FileSystem fs = FileSystem.get(new URI(pathRoot), new Configuration());
+        for (FileStatus status : fs.listStatus(new Path(pathRoot))) {
+          Path temp = status.getPath();
+          if (!fs.isFile(temp)) {
+            String appid = temp.getName();
+            ProjectInfo projectInfo = ProjectInfo.getProjectInfoFromAppidOrProject(appid);
+            if (projectInfo != null) {
+              projectSet.add(projectInfo.getProject());
+            }
+          }
+        }
+        System.out.println("project sets:"+projectSet);
+      }
+    }
 
   }
+
+
+}
 }
 
 
