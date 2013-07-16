@@ -190,7 +190,29 @@ public class RefBitMapRebuild {
           getInstance().dumpSixtyDaysActiveUsersToLocal(pid.replace("ui.check.", ""), nowDate);
         }
         System.out.println("all finished.using " + (System.currentTimeMillis() - currentTime) / 1000 + "s.");
+      }else if(args[0].equals("overflow")){
+        ShardedJedis shardedJedis = null;
+        Set<String> pids = new HashSet<String>();
+        try {
+          shardedJedis = RedisShardedPoolResourceManager.getInstance().getCache(Constants.REDIS_DB_NUM);
+          Collection<Jedis> allShards = shardedJedis.getAllShards();
+          for (Jedis jedis : allShards) {
+            pids.addAll(jedis.keys("ui.check.*"));
+          }
+        } catch (Exception e) {
+          RedisShardedPoolResourceManager.getInstance().returnBrokenResource(shardedJedis);
+          shardedJedis = null;
+        } finally {
+          RedisShardedPoolResourceManager.getInstance().returnResource(shardedJedis);
+        }
+        for (String pid : pids) {
+          System.out.println(pid.replace("ui.check.", ""));
+          getInstance().rebuildSixtyDaysActiveUsersFromLocalFile(pid.replace("ui.check.", ""));
+        }
+
+
       }
+
     }
 
   }
