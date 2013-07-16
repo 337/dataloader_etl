@@ -17,6 +17,8 @@ public class UserPropertyBitmaps {
 
   static final Set<String> permittedProperties = new HashSet<String>();
 
+  static final Set<String> specialProperties = new HashSet<String>();
+
   private Map<String, Map<String, Bitmap>> bitmaps = new HashMap<String, Map<String, Bitmap>>();
 
   private static UserPropertyBitmaps instance = new UserPropertyBitmaps();
@@ -35,63 +37,55 @@ public class UserPropertyBitmaps {
     permittedProjects.add("sof-dsk");
     permittedProjects.add("sof-newgdp");
 
-
-    for (String projectID : permittedProjects) {
-      bitmaps.put(projectID, new HashMap<String, Bitmap>());
-    }
-
-
-    for (String ref : User.refFields) {
-      permittedProperties.add(ref);
-    }
     permittedProperties.add(User.registerField);
     permittedProperties.add(User.lastLoginTimeField);
     permittedProperties.add(User.firstPayTimeField);
     permittedProperties.add(User.nationField);
-    permittedProperties.add(User.refField);
-    permittedProperties.add(User.ref0Field);
-    permittedProperties.add(User.ref1Field);
-    permittedProperties.add(User.ref2Field);
-    permittedProperties.add(User.ref3Field);
-    permittedProperties.add(User.ref4Field);
     permittedProperties.add(User.geoipField);
 
+    for (String ref : User.refFields)
+      specialProperties.add(ref);
 
   }
 
   public boolean isPropertyHit(String projectID, long userID, String propertyName) {
+
     Map<String, Bitmap> project = bitmaps.get(projectID);
     if (project == null) {
       return false;
     }
-    Bitmap bitmap = project.get(propertyName);
-    if (bitmap == null) {
-      if (permittedProperties.contains(propertyName)) {
-        bitmap = new Bitmap();
-        project.put(propertyName, bitmap);
-      } else {
-        return false;
-      }
-    }
-    return bitmap.get(userID);
+    String propertyNameIndeed = transferpropertyName(propertyName);
+
+    Bitmap bitmap = project.get(propertyNameIndeed);
+    return bitmap != null && bitmap.get(userID);
 
   }
 
+  public String transferpropertyName(String propertyName) {
+    String propertyNameIndeed = null;
+    if (specialProperties.contains(propertyName))
+      propertyNameIndeed = User.refField;
+    else
+      propertyNameIndeed = propertyName;
+    return propertyNameIndeed;
+  }
+
   public void markPropertyHit(String projectID, long userID, String propertyName) {
-    Map<String, Bitmap> project = bitmaps.get(projectID);
-    if (project == null) {
-      return;
-    }
-    Bitmap bitmap = project.get(propertyName);
-    if (bitmap == null) {
-      if (permittedProperties.contains(propertyName)) {
-        bitmap = new Bitmap();
-        project.put(propertyName, bitmap);
-      } else {
-        return;
+    if (specialProperties.contains(propertyName) || (permittedProjects.contains(projectID) && permittedProperties
+            .contains(propertyName))) {
+      Map<String, Bitmap> project = bitmaps.get(projectID);
+      if (project == null) {
+        project = new HashMap<String, Bitmap>();
+        bitmaps.put(projectID, project);
       }
+      String propertyNameIndeed = transferpropertyName(propertyName);
+      Bitmap bitmap = project.get(propertyNameIndeed);
+      if (bitmap == null) {
+        bitmap = new Bitmap();
+        project.put(propertyNameIndeed, bitmap);
+      }
+      bitmap.set(userID, true);
     }
-    bitmap.set(userID, true);
   }
 
   public void resetPropertyMap(String projectID, String propertyName) {
@@ -99,21 +93,21 @@ public class UserPropertyBitmaps {
     if (project == null) {
       return;
     }
-    Bitmap bitmap = project.get(propertyName);
+    String propertyNameIndeed = transferpropertyName(propertyName);
+    Bitmap bitmap = project.get(propertyNameIndeed);
     if (bitmap == null) {
-      if (permittedProperties.contains(propertyName)) {
-        bitmap = new Bitmap();
-        project.put(propertyName, bitmap);
-      } else {
-        return;
-      }
+      return;
     }
     bitmap.reset();
   }
 
-  public static void main(String[] args) {
-    getInstance().isPropertyHit("test", 134253123, "ref");
-
+  public boolean ifPropertyNull(String projectID,String propertyName){
+    Map<String, Bitmap> project = bitmaps.get(projectID);
+    if (project == null) {
+      return true;
+    }
+    String propertyNameIndeed = transferpropertyName(propertyName);
+    Bitmap bitmap = project.get(propertyNameIndeed);
+    return bitmap == null;
   }
-
 }

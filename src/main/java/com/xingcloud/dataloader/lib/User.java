@@ -35,7 +35,7 @@ public class User {
     return lower.equals(specialUid1) || lower.equals(specialUid2);
   }
 
-  public User(long seqUid,long timestamp) {
+  public User(long seqUid, long timestamp) {
     this.seqUid = seqUid;
     this.samplingSeqUid = UidMappingUtil.getInstance().decorateWithMD5(seqUid);
     this.timestamp = timestamp;
@@ -210,13 +210,6 @@ public class User {
             return false;
           switch (userProp.getPropFunc()) {
             case once:
-              //ref字段的特殊判断，将翻译来源字段内容
-              //如果，不合法，即为空，跳过
-              //ref字段的处理在logparse里面实现
-//                            if(key.equals("ref")){
-//                                string = User.reslove(string);
-//                                if(string == null) break;
-//                            }
               //如果属性存在不更新
               if (!tempUser.containsKey(key)) tempUser.updateProperty(key, string);
               break;
@@ -252,7 +245,7 @@ public class User {
     stringBuilder.append(seqUid);
     stringBuilder.append("\t");
     stringBuilder.append(JSONObject.fromObject(property).toString());
-    stringBuilder.append("\t") ;
+    stringBuilder.append("\t");
     stringBuilder.append(timestamp);
     return stringBuilder.toString();
   }

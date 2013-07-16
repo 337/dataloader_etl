@@ -174,7 +174,6 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
             if (index == Constants.LAST_TASK_NUM && taskPriority == TaskPriority.High && projectList.equals("all")) {
                 LOG.info("Current day log ends.write user log end .");
-
                 UserOutput.getInstance().writeLogEnd(Constants.USER_DAYEND_LOG);
             }
 

@@ -1,11 +1,13 @@
 package com.xingcloud.dataloader.hbase.readerpool;
 
+import com.xingcloud.dataloader.hbase.table.user.UserPropertyBitmaps;
 import com.xingcloud.dataloader.hbase.tableput.CombineTablePut;
 import com.xingcloud.dataloader.hbase.tableput.TablePut;
 import com.xingcloud.dataloader.hbase.tableput.UserTablePut;
 import com.xingcloud.dataloader.lib.*;
 import com.xingcloud.util.Constants;
 import com.xingcloud.util.ProjectInfo;
+import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -60,6 +62,11 @@ public class ReaderTask implements Runnable {
 
       long t1 = System.currentTimeMillis();
       List<Long> timeList = new ArrayList<Long>();
+      //每天第一个任务，从mysql dump 最近60天的访问用户，这部分用户的ref属性（ref，ref0-ref4）不再重复更新
+      //如果某个用户前一天新注册但是没有在那一天内更新ref*属性，那他的ref*属性就一直不能更新
+      //重启时候，会从本地文件恢复ref的bitmap
+      //其他情况，这个ref不做更新
+      RefBitMapRebuild.getInstance().rebuildSixtyDays(project,date,index);
 
       SeqUidCacheMap.getInstance().initCache(project);
 
@@ -96,7 +103,7 @@ public class ReaderTask implements Runnable {
         SeqUidCacheMap.getInstance().flushCacheToLocal(project);
 
       //每天检查一次该项目的缓存是否需要重置
-      if (index == 144)
+      if (index == flushInternal * 3.5)
         SeqUidCacheMap.getInstance().resetPidCache(project);
 
       LOG.info("finish reading and flushing events the project :" + project + " using " + this.timeTotal + " ms," +
@@ -217,4 +224,6 @@ public class ReaderTask implements Runnable {
       }
     }
   }
+
+
 }

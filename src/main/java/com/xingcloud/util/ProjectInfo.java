@@ -471,12 +471,13 @@ public class ProjectInfo {
                  HttpRequester request = new HttpRequester();
                  HttpRespons hr = request.sendGet("http://p.xingcloud.com/rest/projects?token=bd602691074e1aabdf818f8b539f1ef7");
 
-                 JSONObject json=JSONObject.fromObject(hr.getContent());
+                // JSONObject json=JSONObject.fromObject(hr.getContent());
 
                  DBCollection coll= MongodbDriver.getInstanceDB().getCollection("project");
 
                  BasicDBObject temp=new BasicDBObject();
                  temp.put("info", hr.getContent());
+
                  BasicDBObject updateObject=new BasicDBObject();
                  updateObject.put("$set",temp);
 
@@ -527,9 +528,14 @@ public class ProjectInfo {
 	 * @param args
 	 */
     static public void main(String[] args){
-        String type=args[0];
-        Log4jProperties.init();
+      Log4jProperties.init();
+      if(args.length == 0)
         ProjectInfo.initProjectAndAppid();
+      else
+      {
+        String type=args[0];
+
+
         if(type.equals("clear")){
             try{
                 List<String> appidList=new ArrayList<String>();
@@ -557,7 +563,7 @@ public class ProjectInfo {
         else if(type.equals("update")){
             storeProjectInfoIntoMongodb();
 //            System.out.println(getProjectInfoFromMongodb());
-            System.out.println(ProjectInfo.getProjectInfoFromAppidOrProject("ranchfacebook"));
+//            System.out.println(ProjectInfo.getProjectInfoFromAppidOrProject("ranchfacebook"));
         }
         else if(type.equals("check")){
             String appid=args[1];
@@ -590,5 +596,6 @@ public class ProjectInfo {
         else if(type.equals("clearIgnore")){
             ProjectInfo.setIgnoreProjectsIntoMongodb(new ArrayList<String>());
         }
+      }
     }
 }
