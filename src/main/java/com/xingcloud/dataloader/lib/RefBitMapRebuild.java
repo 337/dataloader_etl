@@ -1,6 +1,7 @@
 package com.xingcloud.dataloader.lib;
 
 import com.xingcloud.dataloader.hbase.table.user.UserPropertyBitmaps;
+import com.xingcloud.redis.RedisShardedPoolResourceManager;
 import com.xingcloud.util.Constants;
 import com.xingcloud.util.ProjectInfo;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
@@ -8,10 +9,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ShardedJedis;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -159,22 +163,23 @@ public class RefBitMapRebuild {
           if (!UserPropertyBitmaps.getInstance().isPropertyHit("sof-newgdp", 8978181, User.ref0Field))
             System.out.println("error " + innerUid);
         }
-      } else if(args[0].equals("init")){
-        Set<String> projectSet = new HashSet<String>();
-        String hdfsRoot = "hdfs://namenode.xingcloud.com:19000";
-        String pathRoot = hdfsRoot + "/user/hadoop/analytics/";
-        FileSystem fs = FileSystem.get(new URI(pathRoot), new Configuration());
-        for (FileStatus status : fs.listStatus(new Path(pathRoot))) {
-          Path temp = status.getPath();
-          if (!fs.isFile(temp)) {
-            String appid = temp.getName();
-            ProjectInfo projectInfo = ProjectInfo.getProjectInfoFromAppidOrProject(appid);
-            if (projectInfo != null) {
-              projectSet.add(projectInfo.getProject());
-            }
+      } else if (args[0].equals("init")) {
+        ShardedJedis shardedJedis = null;
+        Set<String> pids = new HashSet<String>();
+        try {
+          shardedJedis = RedisShardedPoolResourceManager.getInstance().getCache(Constants.REDIS_DB_NUM);
+          Collection<Jedis> allShards = shardedJedis.getAllShards();
+          for (Jedis jedis : allShards) {
+            pids.addAll(jedis.keys("ui.check.*"));
           }
+        } catch (Exception e) {
+          RedisShardedPoolResourceManager.getInstance().returnBrokenResource(shardedJedis);
+          shardedJedis = null;
+        } finally {
+          RedisShardedPoolResourceManager.getInstance().returnResource(shardedJedis);
         }
-        System.out.println("project sets:"+projectSet);
+        System.out.println(pids);
+
       }
     }
 
@@ -182,6 +187,6 @@ public class RefBitMapRebuild {
 
 
 }
-}
+
 
 
