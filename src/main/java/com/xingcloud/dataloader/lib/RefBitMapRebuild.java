@@ -189,7 +189,7 @@ public class RefBitMapRebuild {
         long currentTime = System.currentTimeMillis();
         String nowDate = args[1];
         for (String pid : pids) {
-          getInstance().dumpSixtyDaysActiveUsersToLocal(pid.replace("uid.check.", ""), nowDate);
+          getInstance().dumpSixtyDaysActiveUsersToLocal(pid.replace("ui.check.", ""), nowDate);
         }
         System.out.println("all finished.using " + (System.currentTimeMillis() - currentTime) / 1000 + "s.");
       }
