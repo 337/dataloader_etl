@@ -37,10 +37,9 @@ public class Constants {
     public static final long ONYDAY_TIMEMILLIS = 24 * 3600 * 1000l;
 
 
-//    public static final String SIXTY_DAYS_ACTIVE_USERS="/home/hadoop/60days_active_users/";
-  //TODO
-    public static final String SIXTY_DAYS_ACTIVE_USERS="/Users/ytang1989/Workspace/testfiles/hadoop" +
-        "/60days_active_users/";
+    public static final String SIXTY_DAYS_ACTIVE_USERS="/home/hadoop/60days_active_users/";
+//    public static final String SIXTY_DAYS_ACTIVE_USERS="/Users/ytang1989/Workspace/testfiles/hadoop" +
+//        "/60days_active_users/";
     public static final String UID_CACHE_LOCAL_FILE_PREFIX = "/home/hadoop/uidcache_etl/uidcache_do_not_delete_";
 
     public static final String EVENTLOG = "/data/log/stream.log";

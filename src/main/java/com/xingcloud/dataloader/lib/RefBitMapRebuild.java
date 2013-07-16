@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.util.Random;
 
 /**
  * User: IvyTang
@@ -40,7 +41,10 @@ public class RefBitMapRebuild {
 
     UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.refField);
     // load 60 active users from mysql to localfile.
-    for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
+    String[] nodes = UidMappingUtil.getInstance().nodes().toArray(new String[UidMappingUtil.getInstance().nodes()
+            .size()]);
+    shuffle(nodes);
+    for (String mysqlHost : nodes) {
       String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS + File.separator + project + "_" + mysqlHost;
       BufferedReader dumpBufferedReader = null;
       try {
@@ -77,9 +81,14 @@ public class RefBitMapRebuild {
   }
 
   private void rebuildSixtyDaysActiveUsersFromLocalFile(String project) {
+
+    UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.refField);
+
     for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
 
       String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS + File.separator + project + "_" + mysqlHost;
+
+      System.out.println(filePath);
 
       BufferedReader bufferedReader = null;
       try {
@@ -88,7 +97,6 @@ public class RefBitMapRebuild {
         while ((tmpLine = bufferedReader.readLine()) != null) {
           long innerUid = Long.parseLong(tmpLine) & 0xffffffffl;
           UserPropertyBitmaps.getInstance().markPropertyHit(project, innerUid, User.refField);
-
         }
       } catch (FileNotFoundException e) {
         //do thing
@@ -106,15 +114,39 @@ public class RefBitMapRebuild {
   }
 
 
-  public static void main(String[] args) {
-    getInstance().rebuildSixtyDays("xlfc", "20130715", 1);
-    int[] innerUids = new int[]{1972106, 1972106, 1505918, 1969439, 1971945};
-    for (int innerUid : innerUids) {
-      for (String ref : User.refFields) {
-        if (!UserPropertyBitmaps.getInstance().isPropertyHit("xlfc", innerUid, ref))
-          System.out.println(ref + " error for " + innerUid);
-      }
+  private void exch(String[] list, int i, int j) {
+    String swap = list[i];
+    list[i] = list[j];
+    list[j] = swap;
+  }
+
+  // take as input an array of strings and rearrange them in random order
+  private void shuffle(String[] list) {
+    int N = list.length;
+    Random random = new Random();
+    for (int i = 0; i < N; i++) {
+      int r = random.nextInt(N); // between i and N-1
+//      System.out.println(r);
+      exch(list, i, r);
     }
+
+  }
+
+
+  public static void main(String[] args) throws InterruptedException {
+    getInstance().rebuildSixtyDays("sof-newgdp", "20130715", 0);
+
+//    System.out.println("begin rebuild from local file...");
+//    System.gc();
+//
+//
+//    getInstance().rebuildSixtyDays("sof-newgdp","20130715",4);
+//
+//    System.out.println("rebuild from local file completed.");
+//    System.gc();
+//    Thread.sleep(10*1000);
+
+
   }
 }
 
