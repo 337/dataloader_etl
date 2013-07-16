@@ -41,10 +41,14 @@ public class RefBitMapRebuild {
 
   public void rebuildSixtyDays(String project, String date, int index) {
     if (index == Constants.FIRST_TASK_NUM) {
+      LOG.info("rebuild " + project + " SixtyDaysActiveUsers from mysql.");
       rebuildSixtyDaysActiveUsersFromMySQL(project, date);
     } else {
-      if (UserPropertyBitmaps.getInstance().ifPropertyNull(project, User.refField))
+      if (UserPropertyBitmaps.getInstance().ifPropertyNull(project, User.refField)) {
+        LOG.info("rebuild " + project + " SixtyDaysActiveUsers from localfile.");
         rebuildSixtyDaysActiveUsersFromLocalFile(project);
+      }
+
     }
   }
 
