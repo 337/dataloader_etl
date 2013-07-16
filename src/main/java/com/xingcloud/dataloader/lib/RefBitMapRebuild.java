@@ -207,7 +207,12 @@ public class RefBitMapRebuild {
         }
         for (String pid : pids) {
           System.out.println(pid.replace("ui.check.", ""));
-          getInstance().rebuildSixtyDaysActiveUsersFromLocalFile(pid.replace("ui.check.", ""));
+          try{
+            getInstance().rebuildSixtyDaysActiveUsersFromLocalFile(pid.replace("ui.check.", ""));
+          }   catch (Exception e){
+            e.printStackTrace();
+          }
+
         }
 
 
