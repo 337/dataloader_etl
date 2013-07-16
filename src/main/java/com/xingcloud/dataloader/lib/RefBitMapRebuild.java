@@ -31,8 +31,11 @@ public class RefBitMapRebuild {
 
   private static final RefBitMapRebuild instance = new RefBitMapRebuild();
 
+  private Set<String> ignoreProjects = new HashSet<String>();
+
   private RefBitMapRebuild() {
-    //do nothing
+    ignoreProjects.add("govome");
+    ignoreProjects.add("globososo");
   }
 
   public static RefBitMapRebuild getInstance() {
@@ -40,6 +43,8 @@ public class RefBitMapRebuild {
   }
 
   public void rebuildSixtyDays(String project, String date, int index) {
+    UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.refField);
+    if (ignoreProjects.contains(project)) return;
     if (index == Constants.FIRST_TASK_NUM) {
       LOG.info("rebuild " + project + " SixtyDaysActiveUsers from mysql.");
       rebuildSixtyDaysActiveUsersFromMySQL(project, date);
@@ -48,18 +53,17 @@ public class RefBitMapRebuild {
         LOG.info("rebuild " + project + " SixtyDaysActiveUsers from localfile.");
         rebuildSixtyDaysActiveUsersFromLocalFile(project);
       }
-
     }
   }
 
   private void rebuildSixtyDaysActiveUsersFromMySQL(String project, String date) {
-    UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.refField);
     dumpSixtyDaysActiveUsersToLocal(project, date);
     rebuildSixtyDaysActiveUsersFromLocalFile(project);
   }
 
   private void dumpSixtyDaysActiveUsersToLocal(String project, String date) {
     // load 60 active users from mysql to localfile.
+    long currentTime = System.currentTimeMillis();
     String[] nodes = UidMappingUtil.getInstance().nodes().toArray(new String[UidMappingUtil.getInstance().nodes()
             .size()]);
     shuffle(nodes);
@@ -68,16 +72,11 @@ public class RefBitMapRebuild {
       BufferedReader dumpBufferedReader = null;
       try {
         Runtime rt = Runtime.getRuntime();
-
         String sqlCMD = "mysql -uxingyun -pOhth3cha --database fix_" + project + " -h" + mysqlHost + " -ss -e\"SELECT" +
                 " uid FROM last_login_time where val>=" + TimeIndexV2.getSixtyDaysBefore(date) + "000000\" >  " +
                 filePath;
-
-        System.out.println(sqlCMD);
-
         String[] cmds = new String[]{"/bin/sh", "-c", sqlCMD};
         Process process = rt.exec(cmds);
-
         dumpBufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String cmdOutput = null;
         while ((cmdOutput = dumpBufferedReader.readLine()) != null)
@@ -96,19 +95,15 @@ public class RefBitMapRebuild {
           }
       }
     }
+    LOG.info(project + " dump  60 active from mysql  using " + (System.currentTimeMillis() - currentTime) + " " +
+            "ms.");
 
   }
 
   private void rebuildSixtyDaysActiveUsersFromLocalFile(String project) {
-
-    UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.refField);
-
+    long currentTime = System.currentTimeMillis();
     for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
-
       String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS + File.separator + project + "_" + mysqlHost;
-
-      System.out.println(filePath);
-
       BufferedReader bufferedReader = null;
       try {
         bufferedReader = new BufferedReader(new FileReader(filePath));
@@ -130,6 +125,9 @@ public class RefBitMapRebuild {
           }
       }
     }
+    LOG.info(project + " rebuild 60 from local file using " + (System.currentTimeMillis() - currentTime) + " " +
+            "ms.");
+
   }
 
 
