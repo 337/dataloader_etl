@@ -634,37 +634,46 @@ public class LogParser {
   }
 
   private static void test() throws IOException {
-    LogParser lp = new LogParser("store_log", null);
+//    LogParser lp = new LogParser("store_log", null);
+//
+//    String[] logs = new String[]{"{\"stats\":[{\"function\":\"milestone\",\"data\":[\"60_11\",\"\",\"\",\"\",\"\",\"\",1]}]," +
+//            "\"signedParams\":{\"timestamp\":1342970682,\"appid\":\"ranchfacebook\",\"sns_uid\":\"100000360376558\"}}",
+//
+//            "{\"signedParams\":{\"sns_uid\":\"863986010322176-12b3dfd88690467\",\"appid\":\"age@337_en_android.global.s1\"},\"stats\":[{\"timestamp\":\"1363104258652\",\"statfunction\":\"milestone\",\"data\":[\"initlizeOK\",\"\",\"\",\"\",\"\",\"\",\"1\"]}]}",
+//
+//            "{\"signedParams\":{\"sns_uid\":\"358225043411421-D8B37737D506\",\"appid\":\"age@337_en_android.global.s10\"},\"stats\":[{\"statfunction\":\"count\",\"timestamp\":1363104648,\"data\":[\"xapay\",\"750.0\",\"\",\"\",\"\",\"\",1]}]}",
+//
+//            "{\"signedParams\":{\"sns_uid\":\"868936012013732-149fe859a2f2\",\"appid\":\"age@337_en_android.global.s1\"},\"stats\":[{\"timestamp\":\"1363104049419\",\"statfunction\":\"milestone\",\"data\":[\"initlizeOK\",\"\",\"\",\"\",\"\",\"\",\"1\"]}]}",
+//
+//            "{\"stats\":[{\"statfunction\":\"count\",\"timestamp\":1363103958,\"data\":[\"UIClicks\",\"button\"," +
+//                    "\"button_lib\",\"crops\",\"placeholder\",\"placeholder\",1]}],\"signedParams\":{\"sns_uid\":\"100001063249305\",\"appid\":\"happyfarmer@facebook_de_farmfacebook\"}}",
+//
+//            "{\"signedParams\":{\"sns_uid\":\"100000339407269\"," +
+//                    "\"appid\":\"happyfarmer@facebook_de_farmfacebook\"},\"stats\":[{\"statfunction\":\"count\",\"timestamp\":1363103999,\"data\":[\"UIClicks\",\"toolbar\",\"plow\",null,\"placeholder\",\"placeholder\",1]}]}",
+//
+//            "{\"stats\":[{\"statfunction\":\"count\",\"timestamp\":1363104264,\"data\":[\"UIClicks\",\"toolbar\"," +
+//                    "\"SHOWCOMPLEX\",null,\"placeholder\",\"placeholder\",1]}],\"signedParams\":{\"sns_uid\":\"100000506708634\",\"appid\":\"happyfarmer@facebook_de_farmfacebook\"}}",
+//
+//            "{\"signedParams\":{\"appid\":\"citylife@dena_ja_1.0\",\"uid\":\"dena_57017053\"}," +
+//                    "\"stats\":[{\"timestamp\":1363104002015,\"data\":{\"level_2\":\"mode_button_clicks\",\"level_3\":\"action_menu\",\"amount\":1,\"type\":\"game_actions\",\"level_1\":\"hud_clicks\"},\"statfunction\":\"count\"}]}",
+//            "{\"signedParams\":{\"appid\":\"citylife@dena_ja_1.0\",\"uid\":\"dena_70403821\"}," +
+//                    "\"stats\":[{\"timestamp\":1363104025200,\"data\":{\"level_2\":\"current protocols empty\",\"type\":\"game_actions\",\"level_1\":\"forceServerStats\",\"amount\":1},\"statfunction\":\"count\"}]}",
+//
+//            "{\"signedParams\":{\"appid\":\"citylife@dena_ja_1.0\",\"uid\":\"dena_66390816\"},\"stats\":[{\"timestamp\":1363134033933,\"data\":{\"amount\":1,\"level_1\":\"startup\",\"level_3\":\"3_language\",\"type\":\"game_actions\",\"level_2\":\"all\"},\"statfunction\":\"count\"}]}"
+//    };
+//    for (String log : logs) {
+//      System.out.println(log);
+//      System.out.println(lp.parse(log));
+//    }
 
-    String[] logs = new String[]{"{\"stats\":[{\"function\":\"milestone\",\"data\":[\"60_11\",\"\",\"\",\"\",\"\",\"\",1]}]," +
-            "\"signedParams\":{\"timestamp\":1342970682,\"appid\":\"ranchfacebook\",\"sns_uid\":\"100000360376558\"}}",
+    LogParser lp = new LogParser("site_data", null);
+    String refLog = "xafrom=n=C*k=*c=32069512676*s=www.oneonlinegames.com*br;ddt;g;c;Content-KT2;ddt50lp2";
+    Map<String,String> refMap =lp.analyseRef(refLog);
+    for(Map.Entry<String,String> entry:refMap.entrySet())
+      System.out.println(entry.getKey()+"\t"+entry.getValue());
 
-            "{\"signedParams\":{\"sns_uid\":\"863986010322176-12b3dfd88690467\",\"appid\":\"age@337_en_android.global.s1\"},\"stats\":[{\"timestamp\":\"1363104258652\",\"statfunction\":\"milestone\",\"data\":[\"initlizeOK\",\"\",\"\",\"\",\"\",\"\",\"1\"]}]}",
 
-            "{\"signedParams\":{\"sns_uid\":\"358225043411421-D8B37737D506\",\"appid\":\"age@337_en_android.global.s10\"},\"stats\":[{\"statfunction\":\"count\",\"timestamp\":1363104648,\"data\":[\"xapay\",\"750.0\",\"\",\"\",\"\",\"\",1]}]}",
 
-            "{\"signedParams\":{\"sns_uid\":\"868936012013732-149fe859a2f2\",\"appid\":\"age@337_en_android.global.s1\"},\"stats\":[{\"timestamp\":\"1363104049419\",\"statfunction\":\"milestone\",\"data\":[\"initlizeOK\",\"\",\"\",\"\",\"\",\"\",\"1\"]}]}",
-
-            "{\"stats\":[{\"statfunction\":\"count\",\"timestamp\":1363103958,\"data\":[\"UIClicks\",\"button\"," +
-                    "\"button_lib\",\"crops\",\"placeholder\",\"placeholder\",1]}],\"signedParams\":{\"sns_uid\":\"100001063249305\",\"appid\":\"happyfarmer@facebook_de_farmfacebook\"}}",
-
-            "{\"signedParams\":{\"sns_uid\":\"100000339407269\"," +
-                    "\"appid\":\"happyfarmer@facebook_de_farmfacebook\"},\"stats\":[{\"statfunction\":\"count\",\"timestamp\":1363103999,\"data\":[\"UIClicks\",\"toolbar\",\"plow\",null,\"placeholder\",\"placeholder\",1]}]}",
-
-            "{\"stats\":[{\"statfunction\":\"count\",\"timestamp\":1363104264,\"data\":[\"UIClicks\",\"toolbar\"," +
-                    "\"SHOWCOMPLEX\",null,\"placeholder\",\"placeholder\",1]}],\"signedParams\":{\"sns_uid\":\"100000506708634\",\"appid\":\"happyfarmer@facebook_de_farmfacebook\"}}",
-
-            "{\"signedParams\":{\"appid\":\"citylife@dena_ja_1.0\",\"uid\":\"dena_57017053\"}," +
-                    "\"stats\":[{\"timestamp\":1363104002015,\"data\":{\"level_2\":\"mode_button_clicks\",\"level_3\":\"action_menu\",\"amount\":1,\"type\":\"game_actions\",\"level_1\":\"hud_clicks\"},\"statfunction\":\"count\"}]}",
-            "{\"signedParams\":{\"appid\":\"citylife@dena_ja_1.0\",\"uid\":\"dena_70403821\"}," +
-                    "\"stats\":[{\"timestamp\":1363104025200,\"data\":{\"level_2\":\"current protocols empty\",\"type\":\"game_actions\",\"level_1\":\"forceServerStats\",\"amount\":1},\"statfunction\":\"count\"}]}",
-
-            "{\"signedParams\":{\"appid\":\"citylife@dena_ja_1.0\",\"uid\":\"dena_66390816\"},\"stats\":[{\"timestamp\":1363134033933,\"data\":{\"amount\":1,\"level_1\":\"startup\",\"level_3\":\"3_language\",\"type\":\"game_actions\",\"level_2\":\"all\"},\"statfunction\":\"count\"}]}"
-    };
-    for (String log : logs) {
-      System.out.println(log);
-      System.out.println(lp.parse(log));
-    }
 
 
   }

@@ -180,7 +180,7 @@ public class User {
       //未命中的属性进行user的更新
       switch (userProp.getPropType()) {
         case sql_datetime:
-          Long longValue = (Long) value;
+          Long longValue = Long.parseLong(value.toString());
           switch (userProp.getPropFunc()) {
             case once:
               if (!tempUser.containsKey(key)) tempUser.updateProperty(key, longValue);
@@ -222,7 +222,9 @@ public class User {
           break;
       }
       //记录bitmap
-      UserPropertyBitmaps.getInstance().markPropertyHit(project, tempUser.getSeqUid(), key);
+      //refX 的属性当天不做缓存
+      if (!User.refFields.contains(key))
+        UserPropertyBitmaps.getInstance().markPropertyHit(project, tempUser.getSeqUid(), key);
     } catch (Exception e) {
       //可能属性转换失败，直接抛弃
       LOG.warn(project + "|" + key + "|" + value + "|" + userProp.getPropType() + "|" + e.getMessage(), e);
