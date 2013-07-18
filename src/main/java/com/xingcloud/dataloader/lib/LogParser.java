@@ -607,7 +607,7 @@ public class LogParser {
    * @param timestamp 时间戳字符串
    * @return 转换后的时间戳
    */
-  public long getTs(String timestamp) {
+  public static long getTs(String timestamp) {
         /*
        add delay deal
         */

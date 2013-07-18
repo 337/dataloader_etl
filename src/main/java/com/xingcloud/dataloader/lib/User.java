@@ -3,6 +3,7 @@ package com.xingcloud.dataloader.lib;
 import com.xingcloud.dataloader.hbase.table.user.UserPropertyBitmaps;
 
 import com.xingcloud.mysql.UserProp;
+import com.xingcloud.util.Common;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
@@ -180,7 +181,12 @@ public class User {
       //未命中的属性进行user的更新
       switch (userProp.getPropType()) {
         case sql_datetime:
-          Long longValue = Long.parseLong(value.toString());
+          String dateTimeStr = value.toString();
+          long longValue  = 0;
+          if(dateTimeStr.length() == 14 )
+             longValue = Long.parseLong(value.toString());
+          else
+             longValue = Common.getLongPresentByTimestamp(LogParser.getTs(value.toString()));
           switch (userProp.getPropFunc()) {
             case once:
               if (!tempUser.containsKey(key)) tempUser.updateProperty(key, longValue);
