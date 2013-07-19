@@ -181,8 +181,8 @@ public class LogParser {
       //pay.visit事件和pay.visitc事件都转入新版
       //导致和pay事件（原pay.complete)冲突                                                 1
       //所以转pay.visit为pay_platform.visit
-      if(t.length >= 2){
-        if(t[0].equals("pay") && (t[1].equals("visit") || t[1].equals("visitc")))
+      if (t.length >= 2) {
+        if (t[0].equals("pay") && (t[1].equals("visit") || t[1].equals("visitc")))
           t[0] = "pay_platform";
       }
 //      if (t[0].equals("pay") && (t[])) t[0] = "pay_platform";
@@ -262,9 +262,14 @@ public class LogParser {
     }
     //local的属性，传入的是ip的大小，转为相应的国家
     if (updateMap.containsKey(geoip)) {
-      long ipNumber = Long.parseLong(updateMap.get(geoip).toString());
-      String country = GeoIPCountryWhois.getInstance().getCountry(ipNumber);
-      updateMap.put(geoip, country);
+      try {
+        long ipNumber = Long.parseLong(updateMap.get(geoip).toString());
+        String country = GeoIPCountryWhois.getInstance().getCountry(ipNumber);
+        updateMap.put(geoip, country);
+      } catch (NumberFormatException e) {
+        updateMap.put(geoip, updateMap.get(geoip).toString());
+      }
+
     }
     return objectMapper.writeValueAsString(updateMap);
   }
@@ -469,7 +474,7 @@ public class LogParser {
   }
 
 
-    //parse store log using jackson
+  //parse store log using jackson
   private List<Event> parseStoreJackson() throws IOException {
     List<Event> result = new ArrayList<Event>();
     Map json = objectMapper.readValue(log, Map.class);
@@ -668,12 +673,9 @@ public class LogParser {
 
     LogParser lp = new LogParser("site_data", null);
     String refLog = "xafrom=n=C*k=*c=32069512676*s=www.oneonlinegames.com*br;ddt;g;c;Content-KT2;ddt50lp2";
-    Map<String,String> refMap =lp.analyseRef(refLog);
-    for(Map.Entry<String,String> entry:refMap.entrySet())
-      System.out.println(entry.getKey()+"\t"+entry.getValue());
-
-
-
+    Map<String, String> refMap = lp.analyseRef(refLog);
+    for (Map.Entry<String, String> entry : refMap.entrySet())
+      System.out.println(entry.getKey() + "\t" + entry.getValue());
 
 
   }

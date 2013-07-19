@@ -211,7 +211,7 @@ public class User {
           }
           break;
         case sql_string:
-          String string = (String) value;
+          String string =((String) value).toLowerCase() ;
           if (string.trim().length() == 0)
             return false;
           switch (userProp.getPropFunc()) {
