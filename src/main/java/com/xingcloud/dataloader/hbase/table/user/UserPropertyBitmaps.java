@@ -38,10 +38,21 @@ public class UserPropertyBitmaps {
     permittedProjects.add("sof-newgdp");
 
     permittedProperties.add(User.registerField);
-    permittedProperties.add(User.lastLoginTimeField);
+
     permittedProperties.add(User.firstPayTimeField);
     permittedProperties.add(User.nationField);
     permittedProperties.add(User.geoipField);
+
+    // 每小时重置一次
+    permittedProperties.add(User.lastLoginTimeField);
+
+    //每四个小时重置一次
+    permittedProperties.add(User.platformField);
+    permittedProperties.add(User.versionField);
+    permittedProperties.add(User.identifierField);
+    permittedProperties.add(User.languageField);
+
+
 
     for (String ref : User.refFields)
       specialProperties.add(ref);
@@ -71,6 +82,12 @@ public class UserPropertyBitmaps {
   }
 
   public void markPropertyHit(String projectID, long userID, String propertyName) {
+    Bitmap bitmap = initPropertyMap(projectID, propertyName);
+    if (bitmap != null)
+      bitmap.set(userID, true);
+  }
+
+  public Bitmap initPropertyMap(String projectID, String propertyName) {
     if (specialProperties.contains(propertyName) || (permittedProjects.contains(projectID) && permittedProperties
             .contains(propertyName))) {
       Map<String, Bitmap> project = bitmaps.get(projectID);
@@ -84,8 +101,9 @@ public class UserPropertyBitmaps {
         bitmap = new Bitmap();
         project.put(propertyNameIndeed, bitmap);
       }
-      bitmap.set(userID, true);
+      return bitmap;
     }
+    return null;
   }
 
   public void resetPropertyMap(String projectID, String propertyName) {
@@ -101,7 +119,7 @@ public class UserPropertyBitmaps {
     bitmap.reset();
   }
 
-  public boolean ifPropertyNull(String projectID,String propertyName){
+  public boolean ifPropertyNull(String projectID, String propertyName) {
     Map<String, Bitmap> project = bitmaps.get(projectID);
     if (project == null) {
       return true;

@@ -1,5 +1,6 @@
 package com.xingcloud.dataloader.lib;
 
+import com.sun.org.apache.xalan.internal.xsltc.dom.SimpleResultTreeImpl;
 import com.xingcloud.dataloader.hbase.table.user.UserPropertyBitmaps;
 import com.xingcloud.redis.RedisShardedPoolResourceManager;
 import com.xingcloud.util.Constants;
@@ -33,6 +34,8 @@ public class RefBitMapRebuild {
 
   private Set<String> ignoreProjects = new HashSet<String>();
 
+  private String[] canRecoverFromLocalFiles = new String[]{User.refField, User.registerField, User.nationField, User.geoipField};
+
   private RefBitMapRebuild() {
     ignoreProjects.add("govome");
     ignoreProjects.add("globososo");
@@ -46,19 +49,17 @@ public class RefBitMapRebuild {
     UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.refField);
     if (ignoreProjects.contains(project)) return;
     if (index == Constants.FIRST_TASK_NUM) {
-//      LOG.info("rebuild " + project + " SixtyDaysActiveUsers from mysql.");
       rebuildSixtyDaysActiveUsersFromMySQL(project, date);
     } else {
       if (UserPropertyBitmaps.getInstance().ifPropertyNull(project, User.refField)) {
-//        LOG.info("rebuild " + project + " SixtyDaysActiveUsers from localfile.");
-        rebuildSixtyDaysActiveUsersFromLocalFile(project);
+        rebuildSixtyDaysActiveUsersFromLocalFile(project,canRecoverFromLocalFiles);
       }
     }
   }
 
   private void rebuildSixtyDaysActiveUsersFromMySQL(String project, String date) {
     dumpSixtyDaysActiveUsersToLocal(project, date);
-    rebuildSixtyDaysActiveUsersFromLocalFile(project);
+    rebuildSixtyDaysActiveUsersFromLocalFile(project,new String[]{User.refField});
   }
 
   private void dumpSixtyDaysActiveUsersToLocal(String project, String date) {
@@ -100,8 +101,13 @@ public class RefBitMapRebuild {
 
   }
 
-  private void rebuildSixtyDaysActiveUsersFromLocalFile(String project) {
+  private void rebuildSixtyDaysActiveUsersFromLocalFile(String project,String[] properties) {
+
+    for (String property : properties)
+      UserPropertyBitmaps.getInstance().initPropertyMap(project, property);
+
     long currentTime = System.currentTimeMillis();
+
     for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
       String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS + File.separator + project + "_" + mysqlHost;
       BufferedReader bufferedReader = null;
@@ -110,7 +116,8 @@ public class RefBitMapRebuild {
         String tmpLine = null;
         while ((tmpLine = bufferedReader.readLine()) != null) {
           long innerUid = Long.parseLong(tmpLine) & 0xffffffffl;
-          UserPropertyBitmaps.getInstance().markPropertyHit(project, innerUid, User.refField);
+          for (String property : properties)
+            UserPropertyBitmaps.getInstance().markPropertyHit(project, innerUid, property);
         }
       } catch (FileNotFoundException e) {
         //do thing
@@ -125,9 +132,8 @@ public class RefBitMapRebuild {
           }
       }
     }
-    LOG.info(project + " rebuild 60 from local file using " + (System.currentTimeMillis() - currentTime) + " " +
-            "ms.");
-
+    LOG.info(project + " rebuild ref,nation,register_time,geoip from local file using " + (System.currentTimeMillis()
+            - currentTime) + " " + "" + "ms.");
   }
 
 
@@ -190,7 +196,7 @@ public class RefBitMapRebuild {
           getInstance().dumpSixtyDaysActiveUsersToLocal(pid.replace("ui.check.", ""), nowDate);
         }
         System.out.println("all finished.using " + (System.currentTimeMillis() - currentTime) / 1000 + "s.");
-      }else if(args[0].equals("overflow")){
+      } else if (args[0].equals("overflow")) {
         ShardedJedis shardedJedis = null;
         Set<String> pids = new HashSet<String>();
         try {
@@ -207,9 +213,9 @@ public class RefBitMapRebuild {
         }
         for (String pid : pids) {
           System.out.println(pid.replace("ui.check.", ""));
-          try{
-            getInstance().rebuildSixtyDaysActiveUsersFromLocalFile(pid.replace("ui.check.", ""));
-          }   catch (Exception e){
+          try {
+            getInstance().rebuildSixtyDaysActiveUsersFromLocalFile(pid.replace("ui.check.", ""),new String[]{"ref"});
+          } catch (Exception e) {
             e.printStackTrace();
           }
 
