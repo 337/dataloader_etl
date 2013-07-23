@@ -182,11 +182,16 @@ public class User {
       switch (userProp.getPropType()) {
         case sql_datetime:
           String dateTimeStr = value.toString();
-          long longValue  = 0;
-          if(dateTimeStr.length() == 14 )
-             longValue = Long.parseLong(value.toString());
+          long longValue = 0;
+          if (dateTimeStr.length() == 14)
+            longValue = Long.parseLong(value.toString());
           else
-             longValue = Common.getLongPresentByTimestamp(LogParser.getTs(value.toString()));
+            longValue = Common.getLongPresentByTimestamp(LogParser.getTs(value.toString()));
+          if (longValue < 19700101000000L) {
+            LOG.warn(project+"\t" + "sql datetime value illegal." + value.toString() + "\t" + tempUser.toString());
+            break;
+          }
+
           switch (userProp.getPropFunc()) {
             case once:
               if (!tempUser.containsKey(key)) tempUser.updateProperty(key, longValue);
@@ -211,7 +216,7 @@ public class User {
           }
           break;
         case sql_string:
-          String string =((String) value).toLowerCase() ;
+          String string = ((String) value).toLowerCase();
           if (string.trim().length() == 0)
             return false;
           switch (userProp.getPropFunc()) {
