@@ -16,6 +16,7 @@ import redis.clients.jedis.ShardedJedis;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
@@ -34,7 +35,7 @@ public class RefBitMapRebuild {
 
   private Set<String> ignoreProjects = new HashSet<String>();
 
-  private String[] canRecoverFromLocalFiles = new String[]{User.refField, User.registerField, User.nationField, User.geoipField};
+  private String[] canRecoverFromLocalFiles = new String[]{User.refField,User.registerField,User.geoipField,User.nationField};
 
   private RefBitMapRebuild() {
     ignoreProjects.add("govome");
@@ -52,14 +53,14 @@ public class RefBitMapRebuild {
       rebuildSixtyDaysActiveUsersFromMySQL(project, date);
     } else {
       if (UserPropertyBitmaps.getInstance().ifPropertyNull(project, User.refField)) {
-        rebuildSixtyDaysActiveUsersFromLocalFile(project,canRecoverFromLocalFiles);
+        rebuildSixtyDaysActiveUsersFromLocalFile(project, canRecoverFromLocalFiles);
       }
     }
   }
 
   private void rebuildSixtyDaysActiveUsersFromMySQL(String project, String date) {
     dumpSixtyDaysActiveUsersToLocal(project, date);
-    rebuildSixtyDaysActiveUsersFromLocalFile(project,new String[]{User.refField});
+    rebuildSixtyDaysActiveUsersFromLocalFile(project, new String[]{User.refField});
   }
 
   private void dumpSixtyDaysActiveUsersToLocal(String project, String date) {
@@ -74,8 +75,8 @@ public class RefBitMapRebuild {
       try {
         Runtime rt = Runtime.getRuntime();
         String sqlCMD = "mysql -uxingyun -pOhth3cha --database fix_" + project + " -h" + mysqlHost + " -ss -e\"SELECT" +
-                " uid FROM last_login_time where val>=" + TimeIndexV2.getSixtyDaysBefore(date) + "000000\" >  " +
-                filePath;
+                " uid FROM last_login_time where val>=" + TimeIndexV2.getSixtyDaysBefore(date) + "000000 and val<" +
+                TimeIndexV2.getTwoDaysBefore(date) + "000000\" > " + filePath;
         String[] cmds = new String[]{"/bin/sh", "-c", sqlCMD};
         Process process = rt.exec(cmds);
         dumpBufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -101,7 +102,7 @@ public class RefBitMapRebuild {
 
   }
 
-  private void rebuildSixtyDaysActiveUsersFromLocalFile(String project,String[] properties) {
+  private void rebuildSixtyDaysActiveUsersFromLocalFile(String project, String[] properties) {
 
     for (String property : properties)
       UserPropertyBitmaps.getInstance().initPropertyMap(project, property);
@@ -156,7 +157,7 @@ public class RefBitMapRebuild {
   }
 
 
-  public static void main(String[] args) throws InterruptedException, IOException, URISyntaxException {
+  public static void main(String[] args) throws InterruptedException, IOException, URISyntaxException, ParseException {
     if (args.length != 0) {
       if (args[0].equals("test")) {
         //    getInstance().rebuildSixtyDays("sof-newgdp", "20130715", 0);
@@ -214,7 +215,7 @@ public class RefBitMapRebuild {
         for (String pid : pids) {
           System.out.println(pid.replace("ui.check.", ""));
           try {
-            getInstance().rebuildSixtyDaysActiveUsersFromLocalFile(pid.replace("ui.check.", ""),new String[]{"ref"});
+            getInstance().rebuildSixtyDaysActiveUsersFromLocalFile(pid.replace("ui.check.", ""), new String[]{"ref"});
           } catch (Exception e) {
             e.printStackTrace();
           }

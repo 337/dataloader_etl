@@ -18,6 +18,8 @@ public class TimeIndexV2 {
 
   private static final long sixtyDaysMillis  = 24*3600*1000*60l;
 
+  private static final long twoDaysMillis =  24*3600*1000*2l;
+
   public static int getTimeIndex(long currentTS) {
     long timestamp = currentTS - T5min;
     return getGMTHour(timestamp) * 12 + getGMTMin(timestamp) / 5;
@@ -71,11 +73,24 @@ public class TimeIndexV2 {
     return df.format(new Date(sixtybefore));
   }
 
+  public static String getTwoDaysBefore(String  nowDate) throws ParseException {
+    SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+    df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+    Date date = df.parse(nowDate);
+    long dayStartTime = date.getTime();
+
+    long twoBefore = dayStartTime - twoDaysMillis;
+
+    return df.format(new Date(twoBefore));
+
+  }
+
   public static void main(String[] args) throws ParseException {
     System.out.println(getYearMonthDay(System.currentTimeMillis()));
     System.out.println(getTimeIndex(System.currentTimeMillis()));
     System.out.println(getLastTimeIndex(System.currentTimeMillis()));
     System.out.println(getSixtyDaysBefore("20130708"));
+    System.out.println(getTwoDaysBefore("20130708"));
   }
 
 
