@@ -17,10 +17,7 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: IvyTang
@@ -35,7 +32,7 @@ public class RefBitMapRebuild {
 
   private Set<String> ignoreProjects = new HashSet<String>();
 
-  private String[] canRecoverFromLocalFiles = new String[]{User.refField,User.registerField,User.geoipField,User.nationField};
+  private String[] canRecoverFromLocalFiles = new String[]{User.refField, User.registerField, User.geoipField, User.nationField};
 
   private RefBitMapRebuild() {
     ignoreProjects.add("govome");
@@ -47,7 +44,6 @@ public class RefBitMapRebuild {
   }
 
   public void rebuildSixtyDays(String project, String date, int index) {
-    UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.refField);
     if (ignoreProjects.contains(project)) return;
     if (index == Constants.FIRST_TASK_NUM) {
       rebuildSixtyDaysActiveUsersFromMySQL(project, date);
@@ -104,8 +100,10 @@ public class RefBitMapRebuild {
 
   private void rebuildSixtyDaysActiveUsersFromLocalFile(String project, String[] properties) {
 
-    for (String property : properties)
+    for (String property : properties){
+      UserPropertyBitmaps.getInstance().resetPropertyMap(project,property);
       UserPropertyBitmaps.getInstance().initPropertyMap(project, property);
+    }
 
     long currentTime = System.currentTimeMillis();
 
@@ -219,17 +217,47 @@ public class RefBitMapRebuild {
           } catch (Exception e) {
             e.printStackTrace();
           }
-
         }
-
-
+      }
+    } else {
+      String project = "ddt";
+      String property = "ref0";
+      List<Long> innerUids = new ArrayList<Long>();
+      for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
+        String filePath = "/Users/ytang1989/Workspace/testfiles/hadoop/60days_active_users/" + File.separator + project + "_" + mysqlHost;
+        BufferedReader bufferedReader = null;
+        System.out.println(filePath);
+        try {
+          bufferedReader = new BufferedReader(new FileReader(filePath));
+          String tmpLine = null;
+          while ((tmpLine = bufferedReader.readLine()) != null) {
+            long innerUid = Long.parseLong(tmpLine) & 0xffffffffl;
+            UserPropertyBitmaps.getInstance().markPropertyHit(project, innerUid, property);
+            innerUids.add(innerUid);
+          }
+        } catch (FileNotFoundException e) {
+          //do thing
+        } catch (IOException e) {
+          LOG.error(e.getMessage(), e);
+        } finally {
+          if (bufferedReader != null)
+            try {
+              bufferedReader.close();
+            } catch (IOException e) {
+              LOG.error(e.getMessage(), e);
+            }
+        }
+      }
+      for (long innerUid : innerUids) {
+        if (!UserPropertyBitmaps.getInstance().isPropertyHit(project, innerUid, property))
+          System.out.println("error:" + innerUid);
       }
 
-    }
+
 
   }
 
-
+  }
 }
 
 

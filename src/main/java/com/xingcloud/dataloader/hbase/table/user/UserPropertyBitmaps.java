@@ -38,7 +38,6 @@ public class UserPropertyBitmaps {
     permittedProjects.add("sof-newgdp");
 
     permittedProperties.add(User.registerField);
-
     permittedProperties.add(User.firstPayTimeField);
     permittedProperties.add(User.nationField);
     permittedProperties.add(User.geoipField);
