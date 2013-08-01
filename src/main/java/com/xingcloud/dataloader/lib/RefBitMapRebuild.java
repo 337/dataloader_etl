@@ -73,6 +73,7 @@ public class RefBitMapRebuild {
         String sqlCMD = "mysql -uxingyun -pOhth3cha --database fix_" + project + " -h" + mysqlHost + " -ss -e\"SELECT" +
                 " uid FROM last_login_time where val>=" + TimeIndexV2.getSixtyDaysBefore(date) + "000000 and val<" +
                 TimeIndexV2.getTwoDaysBefore(date) + "000000\" > " + filePath;
+        LOG.info(sqlCMD);
         String[] cmds = new String[]{"/bin/sh", "-c", sqlCMD};
         Process process = rt.exec(cmds);
         dumpBufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
