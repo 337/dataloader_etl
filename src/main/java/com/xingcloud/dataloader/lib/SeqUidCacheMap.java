@@ -2,6 +2,7 @@ package com.xingcloud.dataloader.lib;
 
 import com.carrotsearch.hppc.LongIntOpenHashMap;
 import com.xingcloud.id.c.IDClient;
+import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.mysql.MySql_fixseqid;
 import com.xingcloud.util.Constants;
 import com.xingcloud.util.HashFunctions;
@@ -376,6 +377,7 @@ public class SeqUidCacheMap {
 
   private void cold2Hot(String project, long samplingUid) throws SQLException {
     MySql_fixseqid.getInstance().cold2hot(project, samplingUid);
+    MySql_16seqid.getInstance().cold2hot(project, samplingUid);
   }
 
   private Connection getUidConn(String project, long innerUid) throws SQLException {
@@ -387,7 +389,7 @@ public class SeqUidCacheMap {
     String nodeAddress = UidMappingUtil.getInstance().hash(innerUid);
     Connection connection = nodeConnections.get(nodeAddress);
     if (connection == null) {
-      connection = MySql_fixseqid.getInstance().getConnByNode(project, nodeAddress);
+      connection = MySql_16seqid.getInstance().getConnByNode(project, nodeAddress);
       nodeConnections.put(nodeAddress, connection);
     }
     return connection;

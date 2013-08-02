@@ -59,7 +59,6 @@ public class DeuTable implements MainTable {
 
     private Map<byte[], List<Event>> delayCache = new HashMap<byte[], List<Event>>();
 
-    @Deprecated
     public String getTableName(String projectIdentifier) {
         return tableFistName + projectIdentifier;
     }
@@ -147,7 +146,6 @@ public class DeuTable implements MainTable {
         return delayCache;
     }
 
-    @Deprecated
     public HTableDescriptor getHTableDescriptor(String project) {
         HTableDescriptor hTableDescriptor = new HTableDescriptor(getTableName(project));
         HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(columnFamily);

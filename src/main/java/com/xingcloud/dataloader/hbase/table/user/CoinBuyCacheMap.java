@@ -3,12 +3,11 @@ package com.xingcloud.dataloader.hbase.table.user;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
 import com.xingcloud.dataloader.lib.Event;
 import com.xingcloud.dataloader.lib.SeqUidCacheMap;
-import com.xingcloud.mysql.MySql_fixseqid;
+import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.beans.Statement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -85,7 +84,7 @@ public class CoinBuyCacheMap {
         long t1=System.currentTimeMillis();
         Connection con=cons.get(nodeAddress);
         if(con==null){
-             con = MySql_fixseqid.getInstance().getConnByNode(project, nodeAddress);
+             con = MySql_16seqid.getInstance().getConnByNode(project, nodeAddress);
              cons.put(nodeAddress,con);
         }
         long t2=System.currentTimeMillis();
@@ -93,10 +92,10 @@ public class CoinBuyCacheMap {
         return con;
     }
 
-    private String getDbName(String project) {
-        return "fix_"+project;
-        //return null;  //To change body of created methods use File | Settings | File Templates.
-    }
+//    private String getDbName(String project) {
+//        return "fix_"+project;
+//        //return null;  //To change body of created methods use File | Settings | File Templates.
+//    }
 
     public void put(String project,long ssuid,int val){
         LongIntOpenHashMap pidMap=map.get(project);

@@ -3,7 +3,7 @@ package com.xingcloud.dataloader.hbase.table.user;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
 import com.xingcloud.dataloader.lib.Event;
 import com.xingcloud.dataloader.lib.SeqUidCacheMap;
-import com.xingcloud.mysql.MySql_fixseqid;
+import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,7 +60,7 @@ public class CoinPromotionCacheMap {
         long t1=System.currentTimeMillis();
         Connection con=cons.get(nodeAddress);
         if(con==null){
-            con = MySql_fixseqid.getInstance().getConnByNode(project, nodeAddress);
+            con = MySql_16seqid.getInstance().getConnByNode(project, nodeAddress);
             cons.put(nodeAddress,con);
         }
         long t2=System.currentTimeMillis();
@@ -68,10 +68,10 @@ public class CoinPromotionCacheMap {
         return con;
     }
 
-    private String getDbName(String project) {
-        return "fix_"+project;
-        //return null;  //To change body of created methods use File | Settings | File Templates.
-    }
+//    private String getDbName(String project) {
+//        return "fix_"+project;
+//        //return null;  //To change body of created methods use File | Settings | File Templates.
+//    }
 
     public void put(String project, long ssuid, int val) {
         LongIntOpenHashMap pidMap=map.get(project);
@@ -185,7 +185,7 @@ public class CoinPromotionCacheMap {
             PreparedStatement sta2=null;
             ResultSet rs=null;
             try{
-                con1=MySql_fixseqid.getInstance().getConnByNode("age",node1);
+                con1=MySql_16seqid.getInstance().getConnByNode("age",node1);
 
                 String query="select * from coin_buy limit 1000";
                 String query2="select * from coin_promotion where uid in (390849835678)";
@@ -196,7 +196,7 @@ public class CoinPromotionCacheMap {
                     //LOG.info(rs.getLong(1));
                 }
                 rs.close();
-                con2=MySql_fixseqid.getInstance().getConnByNode("age",node2);
+                con2=MySql_16seqid.getInstance().getConnByNode("age",node2);
                 LOG.info("get connection 2 success");
                 sta2=con2.prepareStatement(query2);
                 rs=sta2.executeQuery();

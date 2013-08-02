@@ -1,5 +1,9 @@
 package com.xingcloud.dataloader.lib;
 
+import com.xingcloud.dataloader.hbase.hash.HBaseHash;
+import com.xingcloud.dataloader.hbase.hash.HBaseKeychain;
+import com.xingcloud.xa.uidmapping.UidMappingUtil;
+
 /**
  * User: IvyTang
  * Date: 13-6-14
@@ -80,5 +84,12 @@ public class Base64Util_Helper {
   public static char byteToChar(byte[] b) {
     char c = (char) (((b[0] & 0xFF) << 8) | (b[1] & 0xFF));
     return c;
+  }
+
+  public static void main(String[] args){
+    for(HBaseHash hBaseHash:HBaseKeychain.getInstance().getConfigs()){
+      System.out.println(hBaseHash.configs().keySet());
+
+    }
   }
 }

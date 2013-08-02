@@ -2,7 +2,7 @@ package com.xingcloud.dataloader.lib;
 
 
 import com.xingcloud.id.c.IDClient;
-import com.xingcloud.mysql.MySql_fixseqid;
+import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.util.Constants;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import org.apache.commons.logging.Log;
@@ -392,9 +392,7 @@ public class OrigIdSeqUidCacheMap {
         }
     }
 
-    private void cold2Hot(String project, long samplingUid) throws SQLException {
-        MySql_fixseqid.getInstance().cold2hot(project, samplingUid);
-    }
+
 
     private Connection getUidConn(String project, long innerUid) throws SQLException {
         Map<String, Connection> nodeConnections = pidNodeConnections.get(project);
@@ -405,7 +403,7 @@ public class OrigIdSeqUidCacheMap {
         String nodeAddress = UidMappingUtil.getInstance().hash(innerUid);
         Connection connection = nodeConnections.get(nodeAddress);
         if (connection == null) {
-            connection = MySql_fixseqid.getInstance().getConnByNode(project, nodeAddress);
+            connection = MySql_16seqid.getInstance().getConnByNode(project, nodeAddress);
             nodeConnections.put(nodeAddress, connection);
         }
         return connection;

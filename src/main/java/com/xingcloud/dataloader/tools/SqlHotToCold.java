@@ -1,7 +1,7 @@
 package com.xingcloud.dataloader.tools;
 
 import com.xingcloud.dataloader.buildtable.mapreduce.BuildUtil;
-import com.xingcloud.mysql.MySql_fixseqid;
+import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.util.Log4jProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,10 +56,10 @@ public class SqlHotToCold {
     public void run(String project, String lastLoginTime) {
 
         try {
-            while (MySql_fixseqid.getInstance().hot2cold(project, lastLoginTime) > 0) {
+            while (MySql_16seqid.getInstance().hot2cold(project, lastLoginTime) > 0) {
                 //do nothing
             }
-            LOG.info("MySql_fixseqid hot2cold" + project + "finish");
+            LOG.info("MySql_16seqid hot2cold" + project + "finish");
         } catch (Exception e) {
             LOG.error(e);
         }

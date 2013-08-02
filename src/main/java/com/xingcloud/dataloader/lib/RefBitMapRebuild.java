@@ -70,7 +70,7 @@ public class RefBitMapRebuild {
       BufferedReader dumpBufferedReader = null;
       try {
         Runtime rt = Runtime.getRuntime();
-        String sqlCMD = "mysql -uxingyun -pOhth3cha --database fix_" + project + " -h" + mysqlHost + " -ss -e\"SELECT" +
+        String sqlCMD = "mysql -uxingyun -pOhth3cha --database "+getMySQLDBName(project) + " -h" + mysqlHost + " -ss -e\"SELECT" +
                 " uid FROM last_login_time where val>=" + TimeIndexV2.getSixtyDaysBefore(date) + "000000 and val<" +
                 TimeIndexV2.getTwoDaysBefore(date) + "000000\" > " + filePath;
         LOG.info(sqlCMD);
@@ -153,6 +153,10 @@ public class RefBitMapRebuild {
       exch(list, i, r);
     }
 
+  }
+
+  private String getMySQLDBName(String project){
+    return "16_"+project;
   }
 
 

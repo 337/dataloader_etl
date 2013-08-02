@@ -4,6 +4,7 @@ import com.xingcloud.dataloader.hbase.table.DeuTable;
 import com.xingcloud.dataloader.lib.HdfsPath;
 import com.xingcloud.hbase.HBaseOperation;
 import com.xingcloud.id.c.IDClient;
+import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.mysql.MySql_fixseqid;
 import com.xingcloud.redis.RedisShardedPoolResourceManager;
 import com.xingcloud.util.Constants;
@@ -79,7 +80,7 @@ public class BuildTableAdmin {
             LOG.info("build_table" + args[1]);
         } else if (mode.equals("build_sql")) {
             try {
-                MySql_fixseqid.getInstance().createDBIfNotExist(args[1]);
+                MySql_16seqid.getInstance().createDBIfNotExist(args[1]);
                 LOG.info("MySql_fixseqid create mysql table");
             } catch (Exception e) {
                 LOG.error("MySql_fixseqid" + e);
@@ -190,6 +191,7 @@ public class BuildTableAdmin {
                 for (int i = 0; i < tryCount; i++) {
                     try {
                         MySql_fixseqid.getInstance().createDBIfNotExist(project);
+                        MySql_16seqid.getInstance().createDBIfNotExist(project);
                         break;
                     } catch (SQLException e) {
                         LOG.error("Mysql ensureProject create  db failed. " + e.getMessage());

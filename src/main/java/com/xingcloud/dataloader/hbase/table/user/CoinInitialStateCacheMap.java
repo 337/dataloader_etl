@@ -3,7 +3,7 @@ package com.xingcloud.dataloader.hbase.table.user;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
 import com.xingcloud.dataloader.lib.Event;
 import com.xingcloud.dataloader.lib.SeqUidCacheMap;
-import com.xingcloud.mysql.MySql_fixseqid;
+import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,7 +80,7 @@ public class CoinInitialStateCacheMap {
         long t1=System.currentTimeMillis();
         Connection con=cons.get(nodeAddress);
         if(con==null){
-            con = MySql_fixseqid.getInstance().getConnByNode(project, nodeAddress);
+            con = MySql_16seqid.getInstance().getConnByNode(project, nodeAddress);
             cons.put(nodeAddress,con);
         }
         long t2=System.currentTimeMillis();
@@ -88,9 +88,9 @@ public class CoinInitialStateCacheMap {
         return con;
     }
 
-    private String getDbName(String project) {
-        return "fix_"+project;
-    }
+//    private String getDbName(String project) {
+//        return "fix_"+project;
+//    }
     public void put(String project, long ssuid, int val) {
         LongIntOpenHashMap pidMap=map.get(project);
         if(pidMap==null){
