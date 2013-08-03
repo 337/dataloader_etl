@@ -45,7 +45,9 @@ public class BuildTableAdmin {
                 Set<String> projectSet = new HashSet<String>();
                 String hdfsRoot = "hdfs://namenode.xingcloud.com:19000";
                 String pathRoot = hdfsRoot + "/user/hadoop/analytics/";
-                FileSystem fs = FileSystem.get(new URI(pathRoot), new Configuration());
+              Configuration configuration = new Configuration();
+              configuration.set("fs.default.name","hdfs://namenode.xingcloud.com:19000");
+                FileSystem fs = FileSystem.get(new URI(pathRoot), configuration);
                 for (FileStatus status : fs.listStatus(new Path(pathRoot))) {
                     Path temp = status.getPath();
                     if (!fs.isFile(temp)) {
@@ -163,7 +165,9 @@ public class BuildTableAdmin {
     static void setProjectInRedis(String project) {
         LOG.info("------Begin to set project to redis... " + project);
         String retunStr = getShardedJedis().set("ui.check." + project, "a");
+
         LOG.info("------Set finished. " + retunStr + " " + project);
+        projectSet.add(project);
     }
 
     static long checkTable = 0;
@@ -201,6 +205,7 @@ public class BuildTableAdmin {
                 }
 
                 setProjectInRedis(project);
+
             }
             long end = System.currentTimeMillis();
             checkTable += end - start;
