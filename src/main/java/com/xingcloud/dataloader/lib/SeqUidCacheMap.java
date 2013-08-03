@@ -221,12 +221,12 @@ public class SeqUidCacheMap {
       }
       //保证每个在sequidcachemap里面的uid，是在热表/或者从冷表转到热表/或者2个表都不在（新增的）的uid；flush_fix就不需要在每次flush时候去check这个uid是否需要从冷表转。
       //本地缓存不在的uid；执行chechInHot和coldtohot
-      if (project.equals("govome") || project.equals("globososo")) {
-        //do not need cold to host
-      } else {
-        if (!checkInHot(project, seqUid))
-          cold2Hot(project, UidMappingUtil.getInstance().decorateWithMD5(seqUid));
-      }
+//      if (project.equals("govome") || project.equals("globososo")) {
+//        //do not need cold to host
+//      } else {
+//        if (!checkInHot(project, seqUid))
+//          cold2Hot(project, UidMappingUtil.getInstance().decorateWithMD5(seqUid));
+//      }
 
       put(project, md5RawUid, seqUid);
       missCount++;
