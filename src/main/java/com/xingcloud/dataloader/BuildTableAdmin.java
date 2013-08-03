@@ -192,17 +192,17 @@ public class BuildTableAdmin {
                 IDClient.getInstance().createdb(project);
                 int tryCount = 3;
                 //三次尝试建库，不成功则发邮件
-//                for (int i = 0; i < tryCount; i++) {
-//                    try {
-//                        MySql_fixseqid.getInstance().createDBIfNotExist(project);
-//                        MySql_16seqid.getInstance().createDBIfNotExist(project);
-//                        break;
-//                    } catch (SQLException e) {
-//                        LOG.error("Mysql ensureProject create  db failed. " + e.getMessage());
-//                        if (i >= tryCount - 1)
-//                            throw e;
-//                    }
-//                }
+                for (int i = 0; i < tryCount; i++) {
+                    try {
+                        MySql_fixseqid.getInstance().createDBIfNotExist(project);
+                        MySql_16seqid.getInstance().createDBIfNotExist(project);
+                        break;
+                    } catch (Exception e) {
+                        LOG.error("Mysql ensureProject create  db failed. " + e.getMessage());
+                        if (i >= tryCount - 1)
+                            throw e;
+                    }
+                }
 
                 setProjectInRedis(project);
 
