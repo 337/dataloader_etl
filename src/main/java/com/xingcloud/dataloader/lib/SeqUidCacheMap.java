@@ -376,7 +376,7 @@ public class SeqUidCacheMap {
   }
 
   private void cold2Hot(String project, long samplingUid) throws SQLException {
-    MySql_fixseqid.getInstance().cold2hot(project, samplingUid);
+//    MySql_fixseqid.getInstance().cold2hot(project, samplingUid);
     MySql_16seqid.getInstance().cold2hot(project, samplingUid);
   }
 
