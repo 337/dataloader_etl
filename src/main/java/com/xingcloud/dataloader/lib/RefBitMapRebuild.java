@@ -62,8 +62,10 @@ public class RefBitMapRebuild {
   private void dumpSixtyDaysActiveUsersToLocal(String project, String date) {
     // load 60 active users from mysql to localfile.
     long currentTime = System.currentTimeMillis();
-    String[] nodes = UidMappingUtil.getInstance().nodes().toArray(new String[UidMappingUtil.getInstance().nodes()
-            .size()]);
+//    String[] nodes = UidMappingUtil.getInstance().nodes().toArray(new String[UidMappingUtil.getInstance().nodes()
+//            .size()]);
+    String[] nodes = new String[]{"192.168.1.147","192.168.1.148","192.168.1.150","192.168.1.152","192.168.1.154",
+            "192.168.1.151"};
     shuffle(nodes);
     for (String mysqlHost : nodes) {
       String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS + File.separator + project + "_" + mysqlHost;
@@ -108,7 +110,10 @@ public class RefBitMapRebuild {
 
     long currentTime = System.currentTimeMillis();
 
-    for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
+    String[] nodes = new String[]{"192.168.1.147","192.168.1.148","192.168.1.150","192.168.1.152","192.168.1.154",
+            "192.168.1.151"};
+    for (String mysqlHost :nodes) {
+//    for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
       String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS + File.separator + project + "_" + mysqlHost;
       BufferedReader bufferedReader = null;
       try {
