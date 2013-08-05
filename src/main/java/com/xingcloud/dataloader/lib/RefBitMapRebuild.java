@@ -162,7 +162,7 @@ public class RefBitMapRebuild {
   }
 
   private String getMySQLDBName(String project){
-    return "16_"+project;
+    return "fix_"+project;
   }
 
 
