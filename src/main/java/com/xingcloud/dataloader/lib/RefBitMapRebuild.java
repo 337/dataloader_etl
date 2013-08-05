@@ -136,6 +136,7 @@ public class RefBitMapRebuild {
             LOG.error(e.getMessage(), e);
           }
       }
+      LOG.info(project+" read "+filePath);
     }
     LOG.info(project + " rebuild ref,nation,register_time,geoip from local file using " + (System.currentTimeMillis()
             - currentTime) + " " + "" + "ms.");
