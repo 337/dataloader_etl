@@ -116,14 +116,14 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
 
       //12的倍数次项目清空bitmap的lastlogintime
-      if (index % 12 == 0) {
+      if (index % 48 == 0) {
         LOG.info("reset bitmap :" + User.lastLoginTimeField);
         for (String project : projectAppidMatch.keySet())
           UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.lastLoginTimeField);
       }
 
       //48的倍数清空 platformField，  versionField，identifierField，languageField
-      if (index % 48 == 0) {
+      if (index  == 5) {
         String[] resetProperties = new String[]{User.platformField, User.versionField, User.identifierField,
                 User.languageField};
         for (String property : resetProperties) {
