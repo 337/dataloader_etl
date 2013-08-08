@@ -45,6 +45,8 @@ public class ProjectPropertyCache {
       try {
         locallist = MySql_16seqid.getInstance().getUserProps(project);
         projectPropertyCache = new ProjectPropertyCache(project, locallist);
+        LOG.info("get getProjectPropertyCacheFromProject for "+project );
+
       } catch (Exception e) {
         LOG.error("MySql_16seqid getProjectPropertyCacheFromProject " + project, e);
         projectPropertyCache = new ProjectPropertyCache(project, null);
