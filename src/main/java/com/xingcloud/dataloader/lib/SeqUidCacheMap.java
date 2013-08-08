@@ -225,6 +225,7 @@ public class SeqUidCacheMap {
       } else {
         if (!checkInHot(project, seqUid))
           cold2Hot(project, UidMappingUtil.getInstance().decorateWithMD5(seqUid));
+
       }
 
       put(project, md5RawUid, seqUid);

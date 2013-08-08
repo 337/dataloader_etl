@@ -73,8 +73,8 @@ public class RefBitMapRebuild {
       try {
         Runtime rt = Runtime.getRuntime();
         String sqlCMD = "mysql -uxingyun -pOhth3cha --database "+getMySQLDBName(project) + " -h" + mysqlHost + " -ss -e\"SELECT" +
-                " uid FROM last_login_time where val>=" + TimeIndexV2.getSixtyDaysBefore(date) + "000000 and val<" +
-                TimeIndexV2.getTwoDaysBefore(date) + "000000\" > " + filePath;
+                " uid FROM last_login_time where val>=" + TimeIndexV2.getSixtyDaysBefore(date+"000000") + " and val<" +
+                TimeIndexV2.getRightHoursBefore(date + "000000") + "\" > " + filePath;
         LOG.info(sqlCMD);
         String[] cmds = new String[]{"/bin/sh", "-c", sqlCMD};
         Process process = rt.exec(cmds);
@@ -161,12 +161,24 @@ public class RefBitMapRebuild {
 
   }
 
-  private String getMySQLDBName(String project){
+  private static String getMySQLDBName(String project){
     return "fix_"+project;
   }
 
 
   public static void main(String[] args) throws InterruptedException, IOException, URISyntaxException, ParseException {
+
+    String project_ = "sof-dsk";
+    String mysqlHost_ = "192.168.1.147";
+    String date_="20130808";
+    String filePath_ = "/tmp/test";
+
+    String sqlCMD = "mysql -uxingyun -pOhth3cha --database "+getMySQLDBName(project_) + " -h" + mysqlHost_ + " -ss " +
+            "-e\"SELECT" +
+            " uid FROM last_login_time where val>=" + TimeIndexV2.getSixtyDaysBefore(date_+"000000") + " and val<" +
+            TimeIndexV2.getRightHoursBefore(date_+"000000") + "\" > " + filePath_;
+    System.out.println(sqlCMD);
+
     if (args.length != 0) {
       if (args[0].equals("test")) {
         //    getInstance().rebuildSixtyDays("sof-newgdp", "20130715", 0);
