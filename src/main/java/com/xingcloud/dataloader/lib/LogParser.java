@@ -22,7 +22,7 @@ public class LogParser {
   ;
 
   public static final Log LOG = LogFactory.getLog(LogParser.class);
-  public static final int fieldLength = 20;
+  public static final int fieldLength = 32;
 
   private LogType type = LogType.DEFAULT;
 

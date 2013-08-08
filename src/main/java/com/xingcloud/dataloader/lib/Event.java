@@ -21,6 +21,8 @@ public class Event {
     //拓展项，用户update事件
     private String json;
 
+  private int eventLength = 256;
+
     public final static int eventFieldLength = 6;
 
     // 序列化后的rowkey
@@ -74,7 +76,7 @@ public class Event {
                 st.append(".");
             } else break;
         }
-        return StaticFunction.ensureLength(st.toString(), 150);
+        return StaticFunction.ensureLength(st.toString(), eventLength);
     }
 
     public String getDate() {
