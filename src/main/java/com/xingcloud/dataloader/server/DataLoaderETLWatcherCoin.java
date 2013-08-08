@@ -4,6 +4,7 @@ import com.xingcloud.dataloader.dao.MessageQueue;
 import com.xingcloud.dataloader.server.message.*;
 import com.xingcloud.util.Log4jProperties;
 import com.xingcloud.util.manager.NetManager;
+import com.xingcloud.xa.uidmapping.UidMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -43,9 +44,8 @@ public class DataLoaderETLWatcherCoin {
      */
     public void run() throws IOException, InterruptedException {
 
-//        Thread monitorThread = new Thread(new ETLScheduleMonitor());
-//        monitorThread.start();
-//        LOG.info("monitor thread :" + ip);
+
+
         LOG.info("start watcher ip:" + ip);
         try {
             while (true) {

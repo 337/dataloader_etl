@@ -2,7 +2,6 @@ package com.xingcloud.dataloader.lib;
 
 
 import com.xingcloud.mysql.MySql_16seqid;
-import com.xingcloud.mysql.MySql_fixseqid;
 import com.xingcloud.mysql.UserProp;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import org.apache.commons.logging.Log;
@@ -44,10 +43,10 @@ public class ProjectPropertyCache {
     if (projectPropertyCache == null) {
       List<UserProp> locallist = null;
       try {
-        locallist = MySql_fixseqid.getInstance().getUserProps(project);
+        locallist = MySql_16seqid.getInstance().getUserProps(project);
         projectPropertyCache = new ProjectPropertyCache(project, locallist);
       } catch (Exception e) {
-        LOG.error("MySql_fixseqid getProjectPropertyCacheFromProject " + project, e);
+        LOG.error("MySql_16seqid getProjectPropertyCacheFromProject " + project, e);
         projectPropertyCache = new ProjectPropertyCache(project, null);
       }
       cache.put(project, projectPropertyCache);
@@ -62,7 +61,7 @@ public class ProjectPropertyCache {
 
   public static void main(String[] args) throws SQLException {
     System.out.println(UidMappingUtil.getInstance().nodes());
-    for (UserProp userProp : MySql_fixseqid.getInstance().getUserProps("web337")) {
+    for (UserProp userProp : MySql_16seqid.getInstance().getUserProps("web337")) {
       System.out.println(userProp.getPropName());
 
     }

@@ -5,7 +5,6 @@ import com.xingcloud.dataloader.lib.HdfsPath;
 import com.xingcloud.hbase.HBaseOperation;
 import com.xingcloud.id.c.IDClient;
 import com.xingcloud.mysql.MySql_16seqid;
-import com.xingcloud.mysql.MySql_fixseqid;
 import com.xingcloud.redis.RedisShardedPoolResourceManager;
 import com.xingcloud.util.Constants;
 import com.xingcloud.util.ProjectInfo;
@@ -83,9 +82,9 @@ public class BuildTableAdmin {
         } else if (mode.equals("build_sql")) {
             try {
                 MySql_16seqid.getInstance().createDBIfNotExist(args[1]);
-                LOG.info("MySql_fixseqid create mysql table");
+                LOG.info("MySql_16seqid create mysql table");
             } catch (Exception e) {
-                LOG.error("MySql_fixseqid" + e);
+                LOG.error("MySql_16seqid" + e);
             }
 
 
@@ -185,7 +184,7 @@ public class BuildTableAdmin {
                 DeuTable deuTable = new DeuTable(project, "20000101");
                 try {
                     HBaseOperation.getInstance().ensureTable(deuTable.getTableName(project), deuTable.getHTableDescriptor(project));
-                    HBaseOperation.getInstance().ensureTable(deuTable.getFixTableName(project), deuTable.getFixHTableDescriptor(project));
+//                    HBaseOperation.getInstance().ensureTable(deuTable.getFixTableName(project), deuTable.getFixHTableDescriptor(project));
                 } catch (TableExistsException e) {
                     LOG.info("Other dataloader has created this hbase table.");
                 }
@@ -194,7 +193,6 @@ public class BuildTableAdmin {
                 //三次尝试建库，不成功则发邮件
                 for (int i = 0; i < tryCount; i++) {
                     try {
-                        MySql_fixseqid.getInstance().createDBIfNotExist(project);
                         MySql_16seqid.getInstance().createDBIfNotExist(project);
                         break;
                     } catch (Exception e) {
