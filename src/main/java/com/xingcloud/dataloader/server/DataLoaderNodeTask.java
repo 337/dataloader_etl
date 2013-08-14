@@ -112,7 +112,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       //扫描本地log目录，得到有新log的project名字，并组成 projectid => list<appid>
 
       Map<String, List<String>> projectAppidMatch = assignAppid();
-      LOG.info("assign all appids using " + (System.currentTimeMillis() - t1) + "ms.");
+      LOG.info("assign all appids using " + (System.currentTimeMillis() - t1) + "ms.pid size:"+projectAppidMatch.size());
 
 
       //12的倍数次项目清空bitmap的lastlogintime
@@ -270,6 +270,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
         }
       }
     }
+    LOG.info("local file has appid:"+appidSet.size());
     return appidSet;
   }
 
