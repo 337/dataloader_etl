@@ -25,7 +25,8 @@ public class GeoIPCountryWhois {
 
   Map<Long, String> ipCountryMap = new HashMap<Long, String>();
   List<Long> ipBlocks = new ArrayList<Long>();
-  List<Long> ipEndBlocks = new ArrayList<Long>();
+  Map<Long, Long> ipStartEndBlocks = new HashMap<Long, Long>();
+  //  List<Long> ipEndBlocks = new ArrayList<Long>();
   int startIpIndex = 5;
   int endIpIndex = 7;
   int countryIndex = 9;
@@ -42,7 +43,9 @@ public class GeoIPCountryWhois {
       while ((tmp = bufferedReader.readLine()) != null) {
         String[] items = tmp.split("\"");
         ipBlocks.add(Long.parseLong(items[startIpIndex]));
-        ipEndBlocks.add(Long.parseLong(items[endIpIndex]));
+
+        ipStartEndBlocks.put(Long.parseLong(items[startIpIndex]), Long.parseLong(items[endIpIndex]));
+
         ipCountryMap.put(Long.parseLong(items[startIpIndex]), items[countryIndex]);
       }
     } catch (IOException e) {
@@ -59,7 +62,7 @@ public class GeoIPCountryWhois {
     if (ipNumber < ipStart || ipNumber > ipEnd)
       throw new IllegalArgumentException("ip range error,shoule be in [16777216,3758096383],not " + ipNumber);
     long startIp = getStartIPBlock(ipNumber, 0, ipCountryMap.size() - 1);
-    long endIp = ipEndBlocks.get(ipBlocks.indexOf(startIp));
+    long endIp = ipStartEndBlocks.get(startIp);
     if (ipNumber <= endIp)
       return ipCountryMap.get(startIp);
     else
@@ -84,7 +87,6 @@ public class GeoIPCountryWhois {
   }
 
   public static void main(String[] args) {
-
 
 
     if (args.length != 0) {
@@ -112,22 +114,22 @@ public class GeoIPCountryWhois {
         System.out.println("error ip 16819984,should be TH ,but is " + THCountry);
 
       String intranet = GeoIPCountryWhois.getInstance().getCountry(3232235619l);
-      if(intranet!=null)
+      if (intranet != null)
         System.out.println("error in check intranet ip 3232235619");
       String intranet2 = GeoIPCountryWhois.getInstance().getCountry(3232301053l);
-      if(intranet2!=null)
+      if (intranet2 != null)
         System.out.println("error in check intranet ip 3232301055");
 
       String hole1 = GeoIPCountryWhois.getInstance().getCountry(86843393l);
-      if(hole1 != null)
+      if (hole1 != null)
         System.out.println("error in check hole ip 86843393");
 
       String hole2 = GeoIPCountryWhois.getInstance().getCountry(406151267l);
-      if(hole2 != null)
+      if (hole2 != null)
         System.out.println("error in check hole ip 406151267");
 
       String hole3 = GeoIPCountryWhois.getInstance().getCountry(1540353021l);
-      if(hole3!=null)
+      if (hole3 != null)
         System.out.println("error in check hole ip 1540353021");
 
 
