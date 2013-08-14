@@ -265,11 +265,11 @@ public class LogParser {
       try {
         long ipNumber = Long.parseLong(updateMap.get(geoip).toString());
         String country = GeoIPCountryWhois.getInstance().getCountry(ipNumber);
-        updateMap.put(geoip, country);
+        if (country != null)
+          updateMap.put(geoip, country);
       } catch (NumberFormatException e) {
         updateMap.put(geoip, updateMap.get(geoip).toString());
       }
-
     }
     return objectMapper.writeValueAsString(updateMap);
   }
