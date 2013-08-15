@@ -267,6 +267,8 @@ public class LogParser {
         String country = GeoIPCountryWhois.getInstance().getCountry(ipNumber);
         if (country != null)
           updateMap.put(geoip, country);
+        else
+          updateMap.remove(geoip);
       } catch (NumberFormatException e) {
         updateMap.put(geoip, updateMap.get(geoip).toString());
       }

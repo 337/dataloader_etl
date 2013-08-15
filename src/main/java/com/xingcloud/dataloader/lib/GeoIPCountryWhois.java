@@ -132,6 +132,9 @@ public class GeoIPCountryWhois {
       if (hole3 != null)
         System.out.println("error in check hole ip 1540353021");
 
+      String hole4 = GeoIPCountryWhois.getInstance().getCountry(3232235784l);
+      System.out.println(hole4);
+
 
     }
 
