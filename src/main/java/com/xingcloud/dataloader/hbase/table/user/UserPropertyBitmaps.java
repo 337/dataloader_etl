@@ -52,7 +52,6 @@ public class UserPropertyBitmaps {
     permittedProperties.add(User.languageField);
 
 
-
     for (String ref : User.refFields)
       specialProperties.add(ref);
 
@@ -81,6 +80,8 @@ public class UserPropertyBitmaps {
   }
 
   public void markPropertyHit(String projectID, long userID, String propertyName) {
+    if (projectID.equals("sof-newgdp") && propertyName.equals(User.versionField))    //sof-newgdp的version属性暂不做缓存
+      return;
     Bitmap bitmap = initPropertyMap(projectID, propertyName);
     if (bitmap != null)
       bitmap.set(userID, true);
