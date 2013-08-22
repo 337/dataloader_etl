@@ -199,7 +199,7 @@ public class LogParser {
     if (event[0].equals("pay") && (uid.trim().length() == 0 || ts == 0)) {
       LOG.error("pay event error." + log);
     }
-    //特殊规则 如果事件为visit事件，并且appid为老式appid（ddt@facebook_pl_1)
+    //特殊规则 如果事件为visit事件，并 且appid为老式appid（ddt@facebook_pl_1)
     //将添加1个属性更新事件，更新language platform 和identifier
     if (event[0].equals("visit") && projectInfo != null) {
       Event updateEvent = getUpdateEvent(uid, value, ts);

@@ -52,9 +52,11 @@ public class Event {
         for (int i = 0; i < tmpEvents.length; i++) {
             if (event[i] == null)
                 break;
-            tmpEvents[i] = event[i].replaceAll(String.valueOf((char) 255), "");
-            tmpEvents[i] = tmpEvents[i].replaceAll("\\*", "");
-            tmpEvents[i] = tmpEvents[i].replaceAll(",", "");
+
+            tmpEvents[i] =event[i].replaceAll("[^\\w]","");
+//            tmpEvents[i] = event[i].replaceAll(String.valueOf((char) 255), "");
+//            tmpEvents[i] = tmpEvents[i].replaceAll("\\*", "");
+//            tmpEvents[i] = tmpEvents[i].replaceAll(",", "");
 
         }
         return tmpEvents;
