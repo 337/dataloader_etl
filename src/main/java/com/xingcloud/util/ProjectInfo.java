@@ -361,6 +361,17 @@ public class ProjectInfo {
             else{
                 if(appid.matches("^[a-zA-Z0-9]([a-zA-Z0-9_.\\-]*)@([a-zA-Z0-9_.\\-]+)_([a-zA-Z0-9_.\\-]+$)")){
                     LOG.warn("wrong appid but match format:"+appid);
+                    int at=appid.indexOf("@");
+                    int firstUnderscore=appid.indexOf("_",at);
+                    int secondUnderscore=appid.indexOf("_",firstUnderscore+1);
+                    String project=appid.substring(0,at);
+                    String platform=appid.substring(at+1,firstUnderscore);
+                    String language=null;
+                    if(secondUnderscore<0) language=appid.substring(firstUnderscore+1);
+                    else language=appid.substring(firstUnderscore+1,secondUnderscore);
+                    String identifier=null;
+                    if(secondUnderscore>0) identifier=appid.substring(secondUnderscore+1);
+                    return new ProjectInfo(project,platform,language,identifier);
                 }
 
             }
