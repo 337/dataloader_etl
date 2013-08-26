@@ -370,7 +370,7 @@ public class ProjectInfo {
                     int firstUnderscore=appid.indexOf("_",at);
                     int secondUnderscore=appid.indexOf("_",firstUnderscore+1);
                     String project=appid.substring(0,at);
-                    if(ignoreProjects.contains(project) || ignoreProjects.contains(project))
+                    if(!projectSet.contains(project))
                       return null;
                     String platform=appid.substring(at+1,firstUnderscore);
                     String language=null;
