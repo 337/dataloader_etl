@@ -595,6 +595,11 @@ public class ProjectInfo {
         }
         else if(type.equals("clearIgnore")){
             ProjectInfo.setIgnoreProjectsIntoMongodb(new ArrayList<String>());
+        }   else if(type.equals("test")){
+          String appid=args[1];
+          ProjectInfo projectInfo=ProjectInfo.getProjectInfoFromAppidOrProject(appid);
+          System.out.println(ProjectInfo.getProjectInfoFromAppidOrProject(appid));
+
         }
       }
     }
