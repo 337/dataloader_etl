@@ -172,8 +172,13 @@ public class ProjectInfo {
         add("xiaoyouxi");
         add("new-sample-code4");
         add("a5646465464564add");
+        add("fx") ;
+        add("defender");
+        add("nztx");
+
     }};
 
+    static List<String> ignoreProjectsInMongo  = getIgnoreProjectsFromMongodb();
     static String mapChange(Map<String,String> map,String key){
         String re=map.get(key);
         if(re!=null) return re;
@@ -291,7 +296,7 @@ public class ProjectInfo {
             long t2=System.currentTimeMillis();
             LOG.info("get http using:"+(t2-t1)+"ms");
             JSONObject json=JSONObject.fromObject(getProjectInfoFromMongodb());
-            ArrayList<String> ignoreProjectsInMongo=getIgnoreProjectsFromMongodb();
+
 
             for(Object keyObj:json.keySet()){
                 if(keyObj instanceof String){
@@ -365,6 +370,8 @@ public class ProjectInfo {
                     int firstUnderscore=appid.indexOf("_",at);
                     int secondUnderscore=appid.indexOf("_",firstUnderscore+1);
                     String project=appid.substring(0,at);
+                    if(ignoreProjects.contains(project) || ignoreProjects.contains(project))
+                      return null;
                     String platform=appid.substring(at+1,firstUnderscore);
                     String language=null;
                     if(secondUnderscore<0) language=appid.substring(firstUnderscore+1);
