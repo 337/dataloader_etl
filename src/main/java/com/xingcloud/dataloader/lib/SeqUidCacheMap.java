@@ -276,7 +276,7 @@ public class SeqUidCacheMap {
       return;
     long size = map.get(pid).size();
     if (size >= resetQuota) {
-      map.put(pid, new LongIntOpenHashMap());
+//      map.put(pid, new LongIntOpenHashMap());
       LOG.info("------UIDCACHE " + pid + " -------- reset cache completed.orig size: " + size + " .reset it.");
     }
   }
