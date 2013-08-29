@@ -179,6 +179,8 @@ public class RefBitMapRebuild {
             TimeIndexV2.getRightHoursBefore(date_+"000000") + "\" > " + filePath_;
     System.out.println(sqlCMD);
 
+    System.out.println(UidMappingUtil.getInstance().nodes());
+
     if (args.length != 0) {
       if (args[0].equals("test")) {
         //    getInstance().rebuildSixtyDays("sof-newgdp", "20130715", 0);
