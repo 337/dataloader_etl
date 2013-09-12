@@ -74,7 +74,7 @@ public class ReaderTask implements Runnable {
       //重启时候，会从本地文件恢复ref的bitmap
       //其他情况，这个ref不做更新
       //TODO
-//      RefBitMapRebuild.getInstance().rebuildSixtyDays(project, date, index);
+      RefBitMapRebuild.getInstance().rebuildSixtyDays(project, date, index);
 
       SeqUidCacheMap.getInstance().initCache(project);
 
@@ -247,8 +247,8 @@ public class ReaderTask implements Runnable {
 
           if (coinEventList.size() >= batchCoinEventNum) {
             List<Event> submitEvents = coinEventList;
-            //TODO
-//            exec.submit(new CoinProcessTask(project, submitEvents, tablePut));
+
+            exec.submit(new CoinProcessTask(project, submitEvents, tablePut));
             coinEventList = new ArrayList<Event>();
           }
         } else
@@ -256,7 +256,7 @@ public class ReaderTask implements Runnable {
       }
     }
     if (coinEventList.size() > 0) {
-//      exec.submit(new CoinProcessTask(project, coinEventList, tablePut));
+      exec.submit(new CoinProcessTask(project, coinEventList, tablePut));
     }
   }
 

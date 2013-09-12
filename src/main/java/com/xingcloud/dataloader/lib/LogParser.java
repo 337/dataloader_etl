@@ -106,7 +106,7 @@ public class LogParser {
   private List<Event> parseSite() throws IOException {
 
 
-    //TODO
+
     List<Event> result = new ArrayList<Event>();
 
     String[] temp = log.split("\t");
