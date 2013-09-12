@@ -699,7 +699,7 @@ public class LogParser {
         List<String> t = splitUsingGivenStr(temps.get(2), ".");
         if (t.size() > 1) {
           if (t.get(0).equals("pay") && (t.get(1).equals("visit") || t.get(1).equals("visitc")))
-            t.add(0, "pay_platform");
+            t.set(0, "pay_platform");
         }
         for (int i = 0; i < t.size() && i < Event.eventFieldLength; i++) {
           eventArray[i] = t.get(i);
