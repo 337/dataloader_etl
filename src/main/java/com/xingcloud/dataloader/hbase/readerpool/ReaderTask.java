@@ -73,7 +73,7 @@ public class ReaderTask implements Runnable {
       //如果某个用户前一天新注册但是没有在那一天内更新ref*属性，那他的ref*属性就一直不能更新
       //重启时候，会从本地文件恢复ref的bitmap
       //其他情况，这个ref不做更新
-      //TODO
+
       RefBitMapRebuild.getInstance().rebuildSixtyDays(project, date, index);
 
       SeqUidCacheMap.getInstance().initCache(project);
