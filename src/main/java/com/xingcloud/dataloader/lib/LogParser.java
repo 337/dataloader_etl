@@ -697,8 +697,10 @@ public class LogParser {
         results.add(new Event(temps.get(1), eventArray, CurrencyManager.calculateAmount(temps.get(3), "USD"), ts));
       } else {
         List<String> t = splitUsingGivenStr(temps.get(2), ".");
-        if (t.get(0).equals("pay") && (t.get(1).equals("visit") || t.get(1).equals("visitc")))
-          t.add(0, "pay_platform");
+        if (t.size() > 1) {
+          if (t.get(0).equals("pay") && (t.get(1).equals("visit") || t.get(1).equals("visitc")))
+            t.add(0, "pay_platform");
+        }
         for (int i = 0; i < t.size() && i < Event.eventFieldLength; i++) {
           eventArray[i] = t.get(i);
         }
