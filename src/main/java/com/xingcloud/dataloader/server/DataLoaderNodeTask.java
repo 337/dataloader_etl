@@ -99,7 +99,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       beginObject.put("index", index);
       beginObject.put("stats", "begin");
 
-//      MongodbDriver.getInstanceDB().getCollection(taskFinishInfoColl).insert(beginObject);
+      MongodbDriver.getInstanceDB().getCollection(taskFinishInfoColl).insert(beginObject);
 
 
       TablePutPool tablePutPool = new TablePutPool(runType);
@@ -114,11 +114,6 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
       long t_v4 = System.currentTimeMillis();
       Map<String, List<String>> v4LogsMaps = readV4LogFillV4Task();
-      for(Map.Entry<String,List<String>> entry:v4LogsMaps.entrySet()){
-        System.out.println(entry.getKey());
-        for(String log:entry.getValue())
-          System.out.println("\t"+log);
-      }
       LOG.info("read all v4log using " + (System.currentTimeMillis() - t_v4) + " ms.v4 pid size:" + v4LogsMaps.size());
 
 
@@ -141,7 +136,6 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
 
       //读取所有的日志并存储到中间类TablePut中去,并flush到本地
-//      boolean readerFinish = true;
       boolean readerFinish = buildProjectTablePut(tablePutPool, projectAppidMatch, v4LogsMaps);
 
       long t2 = System.currentTimeMillis();
@@ -185,8 +179,8 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       finishObject.put("type", runType.name());
       finishObject.put("build", t2 - t1);
       finishObject.put("time", t4 - t1);
-      //TODO
-//      MongodbDriver.getInstanceDB().getCollection(taskFinishInfoColl).insert(finishObject);
+
+      MongodbDriver.getInstanceDB().getCollection(taskFinishInfoColl).insert(finishObject);
 
       ProjectPropertyCache.clearCache();
 
