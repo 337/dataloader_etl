@@ -240,7 +240,6 @@ public class ReaderTask implements Runnable {
     for (String line : v4Logs) {
       List<Event> events = logParser.parse(line);
       for (Event event : events) {
-        System.out.println(event.toString());
         String eventStr = event.getEvent();
         if (eventStr.contains("audit.produce.buy.coin") || eventStr.contains("audit.produce.promotion.coin") ||
                 eventStr.contains("audit.consume.cost")) {
