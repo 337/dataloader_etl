@@ -1,11 +1,13 @@
 package com.xingcloud.dataloader.lib;
 
+import com.xingcloud.dataloader.StaticConfig;
 import com.xingcloud.util.ProjectInfo;
 import com.xingcloud.util.manager.CurrencyManager;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
@@ -17,7 +19,7 @@ import java.util.*;
  * Date:   12-3-12
  */
 public class LogParser {
-  static enum LogType {SITE_DATA, STORE_LOG, DEFAULT}
+  static enum LogType {SITE_DATA, STORE_LOG, V4_LOG, DEFAULT}
 
   ;
 
@@ -41,6 +43,10 @@ public class LogParser {
   private int refSize = 5;
   private int rawRefColonSplitIndex = 2;
 
+  public LogParser(String type) {
+    init(type, null);
+  }
+
   public LogParser(String type, ProjectInfo projectInfo) {
     init(type, projectInfo);
   }
@@ -53,6 +59,8 @@ public class LogParser {
       this.type = LogType.SITE_DATA;
     } else if (type.equals(LocalPath.STORE_LOG)) {
       this.type = LogType.STORE_LOG;
+    } else if (type.equals(LocalPath.V4_LOG)) {
+      this.type = LogType.V4_LOG;
     }
   }
 
@@ -78,6 +86,7 @@ public class LogParser {
       log = inlog;
       if (type == LogType.SITE_DATA) return parseSite();
       else if (type == LogType.STORE_LOG) return parseStoreJackson();
+      else if (type == LogType.V4_LOG) return parseV4Log();
       else return null;
     } catch (Exception e) {
       LOG.warn(log + e.getMessage(), e);
@@ -246,6 +255,29 @@ public class LogParser {
     json.append("}");
     //System.out.println(json);
     return new Event(uid, event, value, ts, json.toString());
+  }
+
+  /**
+   * visit  v4的visit事件如果appid是XX@XX_XX_XX的格式，一样提供language platform identifier的update事件
+   *
+   * @param uid
+   * @param appid
+   * @param value
+   * @param ts
+   * @return update事件
+   */
+  private Event getUpdateEventForV4(String uid, String appid, long value, long ts) throws IOException {
+    String[] event = new String[Event.eventFieldLength];
+    event[0] = "update";
+    Map<String, String> updateMap = new HashMap<String, String>();
+    ProjectInfo appidProjectInfo = ProjectInfo.getProjectInfoFromAppidOrProject(appid);
+    if (appidProjectInfo.getLanguage() != null)
+      updateMap.put(User.languageField, appidProjectInfo.getLanguage());
+    if (appidProjectInfo.getIdentifier() != null)
+      updateMap.put(User.identifierField, appidProjectInfo.getIdentifier());
+    if (appidProjectInfo.getPlatform() != null)
+      updateMap.put(User.platformField, appidProjectInfo.getPlatform());
+    return new Event(uid, event, value, ts, objectMapper.writeValueAsString(updateMap));
   }
 
 
@@ -603,6 +635,77 @@ public class LogParser {
     }
 
     return result;
+  }
+
+  private List<String> splitUsingGivenStr(String splitParent, String splitStr) {
+    List<String> temps = new ArrayList<String>();
+    int start = 0;
+    int pos = -1;
+    while ((pos = splitParent.indexOf(splitStr, start)) > -1) {
+      temps.add(splitParent.substring(start, pos));
+      start = pos + 1;
+    }
+    if (start < splitParent.length()) {
+      temps.add(splitParent.substring(start));
+    }
+    return temps;
+  }
+
+  private List<Event> parseV4Log() throws Exception {
+    List<Event> results = new ArrayList<Event>();
+
+    List<String> temps = splitUsingGivenStr(log, "\t");
+
+    //update log :age	uid123	update	platform	androidmarket	1378189200000
+    if (temps.size() == StaticConfig.V4_UPDATE_ITEMS_NUM && temps.get(2).equals("update")) {
+      Map<String, String> updatePropertyMap = new HashMap<String, String>();
+      if (temps.get(3).equals("ref")) {
+        updatePropertyMap = analyseRef(temps.get(4).trim());
+      } else if (temps.get(3).equals("geoip")) {
+        try {
+          long ipNumber = Long.parseLong(temps.get(4));
+          String country = GeoIPCountryWhois.getInstance().getCountry(ipNumber);
+          if (country != null)
+            updatePropertyMap.put(geoip, country);
+        } catch (NumberFormatException e) {
+          updatePropertyMap.put(geoip, temps.get(4));
+        }
+      } else {
+        updatePropertyMap.put(temps.get(3), temps.get(4));
+      }
+      String[] eventArray = new String[Event.eventFieldLength];
+      eventArray[0] = "update";
+      long ts = getTs(temps.get(5));
+      results.add(new Event(temps.get(1), eventArray, 0, ts, objectMapper.writeValueAsString(updatePropertyMap)));
+    } else if (temps.size() == StaticConfig.V4_ACTION_ITEMS_NUM) {
+
+      String[] eventArray = new String[Event.eventFieldLength];
+      long ts = getTs(temps.get(4));
+
+      //visit event:age@gg_en_android.global.s60	353976050898489-38AA3C2BFC89	visit	0	1378716358447
+      if (temps.get(2).equals("visit")) {
+        eventArray[0] = "visit";
+        //visit
+        results.add(new Event(temps.get(1), eventArray, 0, ts));
+        results.add(getUpdateEventForV4(temps.get(1), temps.get(0), 0, ts));
+        //pay.gross || pay.fee event:
+      } else if (temps.get(2).startsWith("pay.gross") || temps.get(2).startsWith("pay.fee")) {
+        List<String> t = splitUsingGivenStr(temps.get(2), ".");
+        for (int i = 0; i < t.size() && i < Event.eventFieldLength; i++) {
+          eventArray[i] = t.get(i);
+        }
+        results.add(new Event(temps.get(1), eventArray, CurrencyManager.calculateAmount(temps.get(3), "USD"), ts));
+      } else {
+        List<String> t = splitUsingGivenStr(temps.get(2), ".");
+        if (t.get(0).equals("pay") && (t.get(1).equals("visit") || t.get(1).equals("visitc")))
+          t.add(0, "pay_platform");
+        for (int i = 0; i < t.size() && i < Event.eventFieldLength; i++) {
+          eventArray[i] = t.get(i);
+        }
+        results.add(new Event(temps.get(1), eventArray, Long.parseLong(temps.get(3)), ts));
+      }
+    }
+    return results;
   }
 
 

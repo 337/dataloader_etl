@@ -2,6 +2,7 @@ package com.xingcloud.dataloader.server;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.xingcloud.dataloader.StaticConfig;
 import com.xingcloud.dataloader.driver.MongodbDriver;
 import com.xingcloud.dataloader.etloutput.UserOutput;
 import com.xingcloud.dataloader.hbase.readerpool.ReaderPool;
@@ -19,7 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import redis.clients.jedis.Jedis;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -89,7 +90,6 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       LOG.info("begin run Task [" + date + "," + index + "," + runType + ","
               + taskPriority + "] ********************************");
 
-
       //存储mongodb启动记录
       DBObject beginObject = new BasicDBObject();
       beginObject.put("public_ip", publicIp);
@@ -98,11 +98,8 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       beginObject.put("index", index);
       beginObject.put("stats", "begin");
 
+//      MongodbDriver.getInstanceDB().getCollection(taskFinishInfoColl).insert(beginObject);
 
-      MongodbDriver.getInstanceDB().getCollection(taskFinishInfoColl).insert(beginObject);
-
-
-      long t1 = System.currentTimeMillis();
 
       TablePutPool tablePutPool = new TablePutPool(runType);
       LOG.info("begin to build all table");
@@ -110,9 +107,18 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
       //分配appid到project的关系，并筛选要运行的项目。
       //扫描本地log目录，得到有新log的project名字，并组成 projectid => list<appid>
-
+      long t1 = System.currentTimeMillis();
       Map<String, List<String>> projectAppidMatch = assignAppid();
-      LOG.info("assign all appids using " + (System.currentTimeMillis() - t1) + "ms.pid size:"+projectAppidMatch.size());
+      LOG.info("assign all appids using " + (System.currentTimeMillis() - t1) + "ms.pid size:" + projectAppidMatch.size());
+
+      long t_v4 = System.currentTimeMillis();
+      Map<String, List<String>> v4LogsMaps = readV4LogFillV4Task();
+      for(Map.Entry<String,List<String>> entry:v4LogsMaps.entrySet()){
+        System.out.println(entry.getKey());
+        for(String log:entry.getValue())
+          System.out.println("\t"+log);
+      }
+      LOG.info("read all v4log using " + (System.currentTimeMillis() - t_v4) + " ms.v4 pid size:" + v4LogsMaps.size());
 
 
       //12的倍数次项目清空bitmap的lastlogintime
@@ -121,7 +127,6 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
         for (String project : projectAppidMatch.keySet())
           UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.lastLoginTimeField);
       }
-
       //48的倍数清空 platformField，  versionField，identifierField，languageField
       if ((index + 1) % 48 == 0) {
         String[] resetProperties = new String[]{User.platformField, User.versionField, User.identifierField,
@@ -135,7 +140,8 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
 
       //读取所有的日志并存储到中间类TablePut中去,并flush到本地
-      boolean readerFinish = buildProjectTablePut(tablePutPool, projectAppidMatch);
+//      boolean readerFinish = true;
+      boolean readerFinish = buildProjectTablePut(tablePutPool, projectAppidMatch, v4LogsMaps);
 
       long t2 = System.currentTimeMillis();
       LOG.info("using time is :" + (t2 - t1) / 1000 + " second to build all table ");
@@ -178,7 +184,8 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       finishObject.put("type", runType.name());
       finishObject.put("build", t2 - t1);
       finishObject.put("time", t4 - t1);
-      MongodbDriver.getInstanceDB().getCollection(taskFinishInfoColl).insert(finishObject);
+      //TODO
+//      MongodbDriver.getInstanceDB().getCollection(taskFinishInfoColl).insert(finishObject);
 
       ProjectPropertyCache.clearCache();
 
@@ -201,13 +208,18 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
    * @param projectAppidMatch project和appid的映射关系
    * @return 成功或者失败
    */
-  private boolean buildProjectTablePut(TablePutPool tablePutPool, Map<String, List<String>> projectAppidMatch)
+  private boolean buildProjectTablePut(TablePutPool tablePutPool, Map<String, List<String>> projectAppidMatch, Map<String, List<String>> v4LogsMaps)
           throws Exception {
     ReaderPool readerPool = new ReaderPool();
-    for (String project : projectAppidMatch.keySet()) {
-
+    Set<String> projectSet = new HashSet<String>();
+    projectSet.addAll(projectAppidMatch.keySet());
+    projectSet.addAll(v4LogsMaps.keySet());
+    for (String project : projectSet) {
+      System.out.println(project);
       TablePut tablePut = tablePutPool.getTablePut(project, date, index);
-      ReaderTask readerTask = new ReaderTask(project, projectAppidMatch.get(project), tablePut, date, index);
+      List<String> appids = projectAppidMatch.get(project) == null ? new ArrayList<String>() : projectAppidMatch.get(project);
+      List<String> v4Logs = v4LogsMaps.get(project) == null ? new ArrayList<String>() : v4LogsMaps.get(project);
+      ReaderTask readerTask = new ReaderTask(project, appids, tablePut, date, index, v4Logs);
       readerPool.submit(readerTask);
       finishProjectSet.add(project);
     }
@@ -235,6 +247,36 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       }
     }
     return projectAppidMatch;
+  }
+
+
+  private Map<String, List<String>> readV4LogFillV4Task() {
+    Map<String, List<String>> v4_Logs = new HashMap<String, List<String>>();
+    BufferedReader bufferedReader = null;
+    try {
+      bufferedReader = new BufferedReader(new FileReader(LocalPath.getV4LogPath(LocalPath.V4_LOG_LIST, date, index)));
+      String tmpLine = null;
+      while ((tmpLine = bufferedReader.readLine()) != null) {
+        int appidPos = tmpLine.indexOf("\t");
+        if (appidPos > 0) {
+          ProjectInfo projectInfo = ProjectInfo.getProjectInfoFromAppidOrProject(tmpLine.substring(0, appidPos));
+          if (projectInfo == null)
+            continue;
+          String project = projectInfo.getProject();
+          List<String> pLogs = v4_Logs.get(project);
+          if (pLogs == null) {
+            pLogs = new LinkedList<String>();
+            v4_Logs.put(project, pLogs);
+          }
+          pLogs.add(tmpLine);
+        }
+      }
+    } catch (FileNotFoundException e) {
+      LOG.info("v4log " + date + " " + index + " has not the log.");
+    } catch (IOException e) {
+      LOG.error("read v4log " + date + " " + index + " error.", e);
+    }
+    return v4_Logs;
   }
 
   /**
@@ -270,7 +312,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
         }
       }
     }
-    LOG.info("local file has appid:"+appidSet.size());
+    LOG.info("local file has appid:" + appidSet.size());
     return appidSet;
   }
 
@@ -319,8 +361,8 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
    * args :  String date, int index,String projectList,String runType
    */
   static public void main(String[] args) {
-    DataLoaderNodeTask dataLoaderNodeTask = new DataLoaderNodeTask(args[0], Integer.valueOf(args[1]), args[2],
-            args[3], "High");
+    DataLoaderNodeTask dataLoaderNodeTask = new DataLoaderNodeTask("20130903", 201, "all",
+            "Normal", "High");
     dataLoaderNodeTask.run();
   }
 }

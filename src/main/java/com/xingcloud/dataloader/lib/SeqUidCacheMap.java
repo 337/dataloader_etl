@@ -1,5 +1,6 @@
 package com.xingcloud.dataloader.lib;
 
+import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
 import com.xingcloud.id.c.IDClient;
 import com.xingcloud.mysql.MySql_16seqid;
@@ -16,10 +17,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -33,7 +31,7 @@ public class SeqUidCacheMap {
   private static Log LOG = LogFactory.getLog(SeqUidCacheMap.class);
   private static final int one_line_byte = 8 + 4 + 2 * 2; //内存映射到本地的二进制文件每一行的格式为 8个字节的long+2个字节的'\t'+4个字节的int+2个字节的'\n'
   private int mapBatchReadLine = 1024 * 100;       //mapper读 一次读取的行数
-  private long resetQuota = 300 * 10000l;
+  private long resetQuota = 600 * 10000l;
 
   private static SeqUidCacheMap instance;
 
@@ -275,9 +273,20 @@ public class SeqUidCacheMap {
     if (map.get(pid) == null)
       return;
     long size = map.get(pid).size();
-    if (size >= resetQuota) {
-//      map.put(pid, new LongIntOpenHashMap());
-      LOG.info("------UIDCACHE " + pid + " -------- reset cache completed.orig size: " + size + " .reset it.");
+    if (size > resetQuota) {
+      LongIntOpenHashMap shrinkMap = map.get(pid);
+      final long[] keys = shrinkMap.keys;
+      final boolean[] states = shrinkMap.allocated;
+      LongArrayList delKeys = new LongArrayList();
+      for (int i = 0, j = 0; i < states.length && j < size - resetQuota; i++) {
+        if (states[i]) {
+          delKeys.add(keys[i]);
+          j++;
+        }
+      }
+      shrinkMap.removeAll(delKeys);
+      LOG.info("------UIDCACHE " + pid + " -------- reset cache completed.orig size: " + size + " .now is :" + map.get
+              (pid).size());
     }
   }
 

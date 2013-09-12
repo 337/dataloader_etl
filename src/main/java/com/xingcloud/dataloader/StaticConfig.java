@@ -17,6 +17,10 @@ import java.util.List;
 public class StaticConfig {
     public static final Log LOG = LogFactory.getLog(StaticConfig.class);
 
+    public static final int V4_ACTION_ITEMS_NUM = 5;
+
+    public static final int V4_UPDATE_ITEMS_NUM = 6;
+
     @Deprecated
     public static List<String> userProxySpecialProject = new ArrayList<String>() {{
         add("tencent-18894");
@@ -150,16 +154,19 @@ public class StaticConfig {
 
     static public String siteDataList = "/home/hadoop/site_data";
     static public String storeLogList = "/home/hadoop/store_log";
-
+    static public String v4LogList = "/home/hadoop/v4_log";
     static {
+
         try {
             String siteList = ConfigReader.getConfig("dataloader_conf.xml", "site_data");
             String storeList = ConfigReader.getConfig("dataloader_conf.xml", "store_log");
+            String v4List = ConfigReader.getConfig("dataloader_conf.xml", "v4_log");
 
             if (siteList != null) siteDataList = siteList;
             if (storeList != null) storeLogList = storeList;
+            if (v4List != null) v4LogList = v4List;
         } catch (Exception e) {
-            LOG.error("init the siteDataList and storeLogList host info failed", e);
+            LOG.error("init the siteDataList and storeLogList and v4LogList host info failed", e);
         }
     }
 

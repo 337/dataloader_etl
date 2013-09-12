@@ -37,6 +37,11 @@ public class ReaderTask implements Runnable {
 
   private int flushInternal = 48;
 
+  private List<String> v4Logs;
+
+  //coint  batchCoinEventNum
+  int batchCoinEventNum = 1000;
+
   /**
    * 构建读取任务
    *
@@ -48,13 +53,15 @@ public class ReaderTask implements Runnable {
    */
 
 
-  public ReaderTask(String project, List<String> appidList, TablePut tablePut, String date, int index) {
+  public ReaderTask(String project, List<String> appidList, TablePut tablePut, String date, int index, List<String> v4Logs) {
     this.project = project;
     this.appidList = appidList;
     this.tablePut = tablePut;
 
     this.date = date;
     this.index = index;
+
+    this.v4Logs = v4Logs;
   }
 
   public void run() {
@@ -66,9 +73,14 @@ public class ReaderTask implements Runnable {
       //如果某个用户前一天新注册但是没有在那一天内更新ref*属性，那他的ref*属性就一直不能更新
       //重启时候，会从本地文件恢复ref的bitmap
       //其他情况，这个ref不做更新
-      RefBitMapRebuild.getInstance().rebuildSixtyDays(project,date,index);
+      //TODO
+//      RefBitMapRebuild.getInstance().rebuildSixtyDays(project, date, index);
 
       SeqUidCacheMap.getInstance().initCache(project);
+
+      int processCoinThreadNum = 1;
+      ExecutorService audit_exec = Executors.newFixedThreadPool(processCoinThreadNum);
+
 
       //轮询所有服id分析sitedata日志和store_log日志
       for (String appid : appidList) {
@@ -78,12 +90,19 @@ public class ReaderTask implements Runnable {
         }
         long tt1 = System.currentTimeMillis();
         LOG.info("begin to process " + appid);
-        processAllFile(tablePut, LocalPath.SITE_DATA, appid, date, index);
-        processAllFile(tablePut, LocalPath.STORE_LOG, appid, date, index);
+        processAllFile(audit_exec, tablePut, LocalPath.SITE_DATA, appid, date, index);
+        processAllFile(audit_exec, tablePut, LocalPath.STORE_LOG, appid, date, index);
         LOG.info("process " + appid + "completely!");
         long tt2 = System.currentTimeMillis();
         timeList.add(tt2 - tt1);
       }
+
+      //process v4 log
+      processV4Log(audit_exec, tablePut, LocalPath.V4_LOG, date, index);
+
+      //wait coin task finish
+      processCoinTask(audit_exec);
+
       long t2 = System.currentTimeMillis();
       this.timeTotal = (t2 - t1);
 
@@ -98,7 +117,7 @@ public class ReaderTask implements Runnable {
       tablePut.flushToLocal();
 
 
-      //每4个小时flush cache到本地一次，但是内存中的缓存不清空
+      //每4个小时flush  cache到本地一次，但是内存中的缓存不清空
       if ((index + 1) % flushInternal == 0)
         SeqUidCacheMap.getInstance().flushCacheToLocal(project);
 
@@ -132,14 +151,15 @@ public class ReaderTask implements Runnable {
    * @param date     日期
    * @param index    处理的5分钟时间段
    */
-  protected void processAllFile(TablePut tablePut, String type, String appid, String date, int index) {
+  protected void processAllFile(ExecutorService audit_exec, TablePut tablePut, String type, String appid, String date,
+                                int index) {
     if (type.equals(LocalPath.SITE_DATA)) {
       for (String pathPrefix : LocalPath.SITE_DATA_LIST.split(",")) {
-        processFileWithPrefix(pathPrefix, tablePut, type, appid, date, index);
+        processFileWithPrefix(audit_exec, pathPrefix, tablePut, type, appid, date, index);
       }
     } else if (type.equals(LocalPath.STORE_LOG)) {
       for (String pathPrefix : LocalPath.STORE_LOG_LIST.split(",")) {
-        processFileWithPrefix(pathPrefix, tablePut, type, appid, date, index);
+        processFileWithPrefix(audit_exec, pathPrefix, tablePut, type, appid, date, index);
       }
     }
   }
@@ -154,19 +174,18 @@ public class ReaderTask implements Runnable {
    * @param date     日期
    * @param index    处理的5分钟时间段
    */
-  protected void processFileWithPrefix(String prefix, TablePut tablePut, String type, String appid, String date, int index) {
+  protected void processFileWithPrefix(ExecutorService exec, String prefix, TablePut tablePut, String type,
+                                       String appid, String date, int index) {
     int logs = 0;
     int logSize = 0;
     int eventNumber = 0;
     int successfulEventNumber = 0;
     BufferedReader bufferedReader = null;
-    int batchCoinEventNum = 1000;
-    int processCoinThreadNum = 1;
-    ExecutorService exec = Executors.newFixedThreadPool(processCoinThreadNum);
+
     List<Event> coinEventList = new ArrayList<Event>();
-    int coinEventNum = 0;
+
     LogParser logParser = new LogParser(type, ProjectInfo.getProjectInfoFromAppidOrProject(appid));
-    boolean hasCoinTask = false;
+
     try {
       //格式 prefix/site_data/${appid}/${year}/${month}/ea_data_${day}/${index}.log
       String path = LocalPath.getPathWithPrefix(prefix, appid, date, index);
@@ -179,11 +198,8 @@ public class ReaderTask implements Runnable {
       String line = null;
       while ((line = bufferedReader.readLine()) != null) {
         if (line.length() < 1) continue;
-
-
         logs++;
         //按照行读取，每一行的解析工作交给logparser处理
-
         List<Event> temp = logParser.parse(line);
         if (temp == null) continue;
         //把返回的事件列表，交给tableput处理
@@ -194,15 +210,11 @@ public class ReaderTask implements Runnable {
                   eventStr.contains("audit.consume.cost")) {
             coinEventList.add(event);
             successfulEventNumber++;
-            coinEventNum++;
-            //LOG.info(project+": coinEventNum."+coinEventNum+" "+eventStr);
-            hasCoinTask = true;
             if (coinEventList.size() >= batchCoinEventNum) {
               List<Event> submitEvents = coinEventList;
               exec.submit(new CoinProcessTask(project, submitEvents, tablePut));
               coinEventList = new ArrayList<Event>();
             }
-            //exec.submit(new CoinProcessTask(project,event,tablePut));
           } else if (tablePut.put(event)) successfulEventNumber++;
         }
       }
@@ -215,15 +227,47 @@ public class ReaderTask implements Runnable {
         if (coinEventList.size() > 0) {
           exec.submit(new CoinProcessTask(project, coinEventList, tablePut));
         }
-        if (hasCoinTask) {
-          exec.shutdown();
-          exec.awaitTermination(ReaderPool.ThreadPoolMaxTime, TimeUnit.SECONDS);
-        }
       } catch (Exception e) {
         LOG.error("close bufferreader catch Exception " + appid + " " + date + " " + index, e);
       }
     }
   }
 
+  private void processV4Log(ExecutorService exec, TablePut tablePut, String type, String date, int index) {
+    LogParser logParser = new LogParser(type);
+    List<Event> coinEventList = new ArrayList<Event>();
 
+    for (String line : v4Logs) {
+      List<Event> events = logParser.parse(line);
+      for (Event event : events) {
+        System.out.println(event.toString());
+        String eventStr = event.getEvent();
+        if (eventStr.contains("audit.produce.buy.coin") || eventStr.contains("audit.produce.promotion.coin") ||
+                eventStr.contains("audit.consume.cost")) {
+          coinEventList.add(event);
+
+          if (coinEventList.size() >= batchCoinEventNum) {
+            List<Event> submitEvents = coinEventList;
+            //TODO
+//            exec.submit(new CoinProcessTask(project, submitEvents, tablePut));
+            coinEventList = new ArrayList<Event>();
+          }
+        } else
+          tablePut.put(event);
+      }
+    }
+    if (coinEventList.size() > 0) {
+//      exec.submit(new CoinProcessTask(project, coinEventList, tablePut));
+    }
+  }
+
+  private void processCoinTask(ExecutorService exec) throws InterruptedException {
+    exec.shutdown();
+    boolean result = exec.awaitTermination(ReaderPool.ThreadPoolMaxTime, TimeUnit.SECONDS);
+    if (!result) {
+      exec.shutdownNow();
+      LOG.error(project + "\t" + date + "\t" + index + " Coin Task timeout.");
+    }
+
+  }
 }
