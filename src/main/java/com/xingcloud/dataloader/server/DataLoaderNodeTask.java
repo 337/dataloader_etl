@@ -13,6 +13,7 @@ import com.xingcloud.dataloader.hbase.tableput.TablePutPool;
 import com.xingcloud.dataloader.lib.*;
 import com.xingcloud.redis.RedisResourceManager;
 import com.xingcloud.util.Constants;
+import com.xingcloud.util.Log4jProperties;
 import com.xingcloud.util.ProjectInfo;
 import com.xingcloud.util.manager.CurrencyManager;
 import com.xingcloud.util.manager.NetManager;
@@ -215,7 +216,6 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
     projectSet.addAll(projectAppidMatch.keySet());
     projectSet.addAll(v4LogsMaps.keySet());
     for (String project : projectSet) {
-      System.out.println(project);
       TablePut tablePut = tablePutPool.getTablePut(project, date, index);
       List<String> appids = projectAppidMatch.get(project) == null ? new ArrayList<String>() : projectAppidMatch.get(project);
       List<String> v4Logs = v4LogsMaps.get(project) == null ? new ArrayList<String>() : v4LogsMaps.get(project);
@@ -361,6 +361,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
    * args :  String date, int index,String projectList,String runType
    */
   static public void main(String[] args) {
+    Log4jProperties.init();
     DataLoaderNodeTask dataLoaderNodeTask = new DataLoaderNodeTask("20130903", 201, "all",
             "Normal", "High");
     dataLoaderNodeTask.run();
