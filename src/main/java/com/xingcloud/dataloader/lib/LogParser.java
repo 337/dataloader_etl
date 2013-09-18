@@ -37,6 +37,7 @@ public class LogParser {
 
   private String xafrom_ref = "xafrom=";
   private String sgfrom_ref = "sgfrom=";
+  private String facebook_age_ref_start = "{";
 
   private String geoip = "geoip";
 
@@ -104,7 +105,6 @@ public class LogParser {
    * @return the event list from the log
    */
   private List<Event> parseSite() throws IOException {
-
 
 
     List<Event> result = new ArrayList<Event>();
@@ -358,6 +358,15 @@ public class LogParser {
     } else if (refContent.startsWith(sgfrom_ref)) {
       if (refContent.length() > sgfrom_ref.length())
         refs.put("ref", refContent.substring(sgfrom_ref.length()).trim());
+    } else if (refContent.startsWith(facebook_age_ref_start)) {
+      try {
+        Map facebook_ref_age_map = objectMapper.readValue(refContent, Map.class);
+        if(facebook_ref_age_map.containsKey("app") && facebook_ref_age_map.containsKey("t"))
+          refs.put("ref0","f");
+      } catch (IOException e) {
+        LOG.warn(log, e);
+        refs.put("ref", refContent);
+      }
     } else {
       if (refContent.length() > 0)
         refs.put("ref", refContent);
