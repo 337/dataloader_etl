@@ -126,6 +126,8 @@ public class EventMetaTable {
     public boolean checkEvent(Event event) {
 //        LOG.info("check event");
         String[] key = normalize(event.getEventArray());
+        if(key.length == 0)
+          return false;
         EventMeta eventMeta = eventMap.get(key);
         if (eventMeta != null) {
             dirty(eventMeta);
