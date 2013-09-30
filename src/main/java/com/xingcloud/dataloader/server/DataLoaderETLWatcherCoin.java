@@ -44,7 +44,8 @@ public class DataLoaderETLWatcherCoin {
      */
     public void run() throws IOException, InterruptedException {
 
-
+        Thread monitorThread = new Thread(new ETLScheduleMonitor());
+        monitorThread.start();
 
         LOG.info("start watcher ip:" + ip);
         try {

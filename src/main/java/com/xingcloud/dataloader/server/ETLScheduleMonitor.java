@@ -27,6 +27,7 @@ public class ETLScheduleMonitor implements Runnable {
 
   @Override
   public void run() {
+    LOG.info("begin run ETLScheduleMonitor.");
     try {
       Thread.sleep(INITIATE_SLEEP_TIME);
     } catch (InterruptedException e) {
