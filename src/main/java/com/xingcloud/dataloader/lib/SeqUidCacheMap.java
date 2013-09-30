@@ -31,7 +31,7 @@ public class SeqUidCacheMap {
   private static Log LOG = LogFactory.getLog(SeqUidCacheMap.class);
   private static final int one_line_byte = 8 + 4 + 2 * 2; //内存映射到本地的二进制文件每一行的格式为 8个字节的long+2个字节的'\t'+4个字节的int+2个字节的'\n'
   private int mapBatchReadLine = 1024 * 100;       //mapper读 一次读取的行数
-  private long resetQuota = 600 * 10000l;
+  private long resetQuota = 500 * 10000l;
 
   private static SeqUidCacheMap instance;
 
