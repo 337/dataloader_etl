@@ -195,6 +195,7 @@ public class SeqUidCacheMap {
     }
     map.put(pID, longIntOpenHashMap);
 
+    resetPidCache(pID);
 
   }
 
