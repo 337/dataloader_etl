@@ -315,29 +315,34 @@ public class SeqUidCacheMap {
     long govome_UidTime = getUidTime.get("govome") == null ? 0 : getUidTime.get("govome");
     long globososo_UidTime = getUidTime.get("globososo") == null ? 0 : getUidTime.get("globososo");
     long sof_dsk_UidTime = getUidTime.get("sof-dsk") == null ? 0 : getUidTime.get("sof-dsk");
-    long sof_newgdp_UidTime = getUidTime.get("v9-sof") == null ? 0 : getUidTime.get("v9-sof");
+    long sof_newgdp_UidTime = getUidTime.get("sof-newgdp") == null ? 0 : getUidTime.get("sof-newgdp");
     long i18n_status_UidTime = getUidTime.get("i18n-status") == null ? 0 : getUidTime.get("i18n-status");
     long sof_newhpnt_UidTime = getUidTime.get("sof-newhpnt") == null ? 0 : getUidTime.get("sof-newhpnt");
 
 
     LOG.info("------UIDCACHE-------- getUid v9-v9:" + v9_v9_UidTime / 1000000 + "ms.govome:" +
             govome_UidTime / 1000000 + "ms.globososo:" + globososo_UidTime / 1000000 + "ms" +
-            ".sof_dsk:" + sof_dsk_UidTime / 1000000 + "ms.v9-sof:" + sof_newgdp_UidTime / 1000000 + "ms" +
+            ".sof_dsk:" + sof_dsk_UidTime / 1000000 + "ms.sof-newgdp:" + sof_newgdp_UidTime / 1000000 + "ms" +
             ".i18n_statu:" + i18n_status_UidTime / 1000000 + "ms.sof_newhpnt:" + sof_newhpnt_UidTime / 1000000 + "ms.");
     LOG.info("------UIDCACHE-------- cache hit v9-v9: allCount" + allCount_v9_v9 + " hitCount:" +
-            (allCount_v9_v9 - missCount_v9_v9));
+            (allCount_v9_v9 - missCount_v9_v9) + " Total cached uid number: " + map.get("v9-v9")==null?0:map.get("v9-v9").size());
     LOG.info("------UIDCACHE-------- cache hit govome: allCount: " + allCount_govome + " hitCount: " +
-            (allCount_govome - missCount_govome));
+            (allCount_govome - missCount_govome) + " Total cached uid number: " + map.get("govome")==null?0:map.get("govome").size());
     LOG.info("------UIDCACHE-------- cache hit globososo: allCount: " + allCount_globososo + " hitCount: " +
-            (allCount_globososo - missCount_globososo));
+            (allCount_globososo - missCount_globososo)
+            + " Total cached uid number: " + map.get("globososo")==null?0:map.get("globososo").size());
     LOG.info("------UIDCACHE-------- cache hit sof_dsk: allCount: " + allCount_sof_dsk + " hitCount: " +
-            (allCount_sof_dsk - missCount_sof_dsk));
-    LOG.info("------UIDCACHE-------- cache hit v9-sof: allCount: " + allCount_sof_newgdp + " hitCount: " +
-            (allCount_sof_newgdp - missCount_sof_newgdp));
+            (allCount_sof_dsk - missCount_sof_dsk)
+            + " Total cached uid number: " + map.get("sof-dsk")==null?0:map.get("sof-dsk").size());
+    LOG.info("------UIDCACHE-------- cache hit sof-newgdp: allCount: " + allCount_sof_newgdp + " hitCount: " +
+            (allCount_sof_newgdp - missCount_sof_newgdp)
+            + " Total cached uid number: " + map.get("sof-newgdp")==null?0:map.get("sof-newgdp").size());
     LOG.info("------UIDCACHE-------- cache hit i18n_status: allCount: " + allCount_i18n_status + " hitCount: " +
-            (allCount_i18n_status - missCount_i18n_status));
+            (allCount_i18n_status - missCount_i18n_status)
+            + " Total cached uid number: " + map.get("i18n-status")==null?0:map.get("i18n-status").size());
     LOG.info("------UIDCACHE-------- cache hit sof_newhpnt: allCount: " + allCount_sof_newhpnt + " hitCount: " +
-            (allCount_sof_newhpnt - missCount_sof_newhpnt));
+            (allCount_sof_newhpnt - missCount_sof_newhpnt)
+            + " Total cached uid number: " + map.get("sof-newhpnt")==null?0:map.get("sof-newhpnt").size());
 
   }
 
