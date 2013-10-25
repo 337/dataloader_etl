@@ -45,6 +45,9 @@ public class RefBitMapRebuild {
 
   public void rebuildSixtyDays(String project, String date, int index) {
     if (ignoreProjects.contains(project)) return;
+
+    LOG.info("rebuildSixtyDays for project: " + project);
+
     if (index == Constants.FIRST_TASK_NUM) {
       rebuildSixtyDaysActiveUsersFromMySQL(project, date);
     } else {
