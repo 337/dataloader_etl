@@ -179,6 +179,7 @@ public class SeqUidCacheMap {
           longIntOpenHashMap.put(key, value);
         }
       }
+      map.put(pID, longIntOpenHashMap);
       LOG.info("------UIDCACHE " + pID + " -------- init cache completed. Size:" + linesCount + " Taken: " + (System
               .nanoTime() - startTime) / 1.0e9 + "s.");
     } catch (java.io.FileNotFoundException fne) {
@@ -196,7 +197,7 @@ public class SeqUidCacheMap {
         }
       }
     }
-    map.put(pID, longIntOpenHashMap);
+
   }
 
 
@@ -391,7 +392,8 @@ public class SeqUidCacheMap {
     missCount_i18n_status = 0;
     missCount_sof_newhpnt = 0;
 
-    getUidTime = new ConcurrentHashMap<String, Long>();
+    getUidTime.clear();
+    getThriftTime.clear();
     for (Map.Entry<String, Map<String, Connection>> entry : pidNodeConnections.entrySet()) {
       closeOneProjectConnection(entry.getKey());
     }
