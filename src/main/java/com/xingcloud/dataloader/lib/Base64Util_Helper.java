@@ -86,6 +86,20 @@ public class Base64Util_Helper {
     return c;
   }
 
+  public static char byteToTab(byte[] b, int offset) {
+    char c = (char) (((b[offset] & 0xFF) << 8) | (b[offset+1] & 0xFF));
+    return c;
+  }
+
+  public static int getCapacity(long num) {
+    int i = 0;
+    while(num != 0) {
+      num = num >> 1;
+      i++;
+    }
+    return 1 << i;
+  }
+
   public static void main(String[] args){
     for(HBaseHash hBaseHash:HBaseKeychain.getInstance().getConfigs()){
       System.out.println(hBaseHash.configs().keySet());
