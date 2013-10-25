@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Author: mulisen
@@ -19,7 +20,7 @@ public class UserPropertyBitmaps {
 
   static final Set<String> specialProperties = new HashSet<String>();
 
-  private Map<String, Map<String, Bitmap>> bitmaps = new HashMap<String, Map<String, Bitmap>>();
+  private Map<String, Map<String, Bitmap>> bitmaps = new ConcurrentHashMap<String, Map<String, Bitmap>>();
 
   private static UserPropertyBitmaps instance = new UserPropertyBitmaps();
 
