@@ -86,10 +86,10 @@ public class SeqUidCacheMap {
   }
 
   private int get(String pID, long md5RawUid) {
-    if (!map.containsKey(pID)) {
+    LongIntOpenHashMap longIntOpenHashMap = map.get(pID);
+    if (longIntOpenHashMap == null) {
       return 0;
     }
-    LongIntOpenHashMap longIntOpenHashMap = map.get(pID);
     return longIntOpenHashMap.get(md5RawUid);
   }
 
