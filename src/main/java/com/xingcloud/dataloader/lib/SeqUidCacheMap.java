@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SeqUidCacheMap {
   private static Log LOG = LogFactory.getLog(SeqUidCacheMap.class);
   private static final int one_line_byte = 8 + 4 + 2 * 2; //内存映射到本地的二进制文件每一行的格式为 8个字节的long+2个字节的'\t'+4个字节的int+2个字节的'\n'
-  private int mapBatchReadLine = 1024 * 100;       //mapper读 一次读取的行数
+  private int mapBatchReadLine = 1024;       //mapper读 一次读取的行数
   private long resetQuota = 400 * 10000l;
 
   private static SeqUidCacheMap instance;
@@ -58,6 +58,7 @@ public class SeqUidCacheMap {
   private int allCount_sof_newhpnt;
 
   private Map<String, Long> getUidTime;
+  private Map<String, Long> getThriftTime;
 
   private Map<String, Map<String, Connection>> pidNodeConnections;
 
@@ -73,6 +74,7 @@ public class SeqUidCacheMap {
     map = new ConcurrentHashMap<String, LongIntOpenHashMap>();
     getUidTime = new ConcurrentHashMap<String, Long>();
     pidNodeConnections = new HashMap<String, Map<String, Connection>>();
+    getThriftTime = new ConcurrentHashMap<String, Long>();
   }
 
   private void put(String pID, long md5RawUid, int seqUid) {
@@ -86,10 +88,10 @@ public class SeqUidCacheMap {
   }
 
   private int get(String pID, long md5RawUid) {
-    if (!map.containsKey(pID)) {
+    LongIntOpenHashMap longIntOpenHashMap = map.get(pID);
+    if (longIntOpenHashMap == null) {
       return 0;
     }
-    LongIntOpenHashMap longIntOpenHashMap = map.get(pID);
     return longIntOpenHashMap.get(md5RawUid);
   }
 
@@ -151,29 +153,29 @@ public class SeqUidCacheMap {
     long startTime = System.nanoTime();
     File file = new File(Constants.UID_CACHE_LOCAL_FILE_PREFIX + pID);
     FileChannel channel = null;
-    LongIntOpenHashMap longIntOpenHashMap = new LongIntOpenHashMap();
+    LongIntOpenHashMap longIntOpenHashMap = null;
     try {
       channel = new FileInputStream(file).getChannel();
       MappedByteBuffer buff = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
-      byte[] b;
+      byte[] b = new byte[mapBatchReadLine * one_line_byte];
       long linesCount = file.length() / one_line_byte;   //文件行数
+      longIntOpenHashMap = new LongIntOpenHashMap(Base64Util_Helper.getCapacity(linesCount));
+
       for (int index = 0; index < linesCount; index += mapBatchReadLine) {
         //一次读取 mapBatchReadLine
-        if (linesCount - index > mapBatchReadLine) {
-          b = new byte[mapBatchReadLine * one_line_byte];
-        } else {
+        if (linesCount - index < mapBatchReadLine) {
           b = new byte[(int) ((linesCount - index) * one_line_byte)];
         }
         buff.get(b);
         int indeedSize = b.length / one_line_byte;     //实际一次读取的行数
         for (int i = 0; i < indeedSize; i++) {
           int begin = i * one_line_byte;
-          long key = Base64Util_Helper.toLong(new byte[]{b[begin], b[begin + 1], b[begin + 2], b[begin + 3], b[begin + 4], b[begin + 5], b[begin + 6], b[begin + 7]});
-          char tab = Base64Util_Helper.byteToChar(new byte[]{b[begin + 8], b[begin + 9]});
+          long key = Base64Util_Helper.toLong(b, begin);
+          long tab = Base64Util_Helper.byteToTab(b, begin+8);
           if (tab != '\t') {
             throw new RuntimeException("Unrecognized file format.");
           }
-          int value = Base64Util_Helper.toInteger(new byte[]{b[begin + 10], b[begin + 11], b[begin + 12], b[begin + 13]});
+          int value = Base64Util_Helper.toInteger(b, begin+10);
           longIntOpenHashMap.put(key, value);
         }
       }
@@ -186,17 +188,15 @@ public class SeqUidCacheMap {
       LOG.error("------UIDCACHE " + pID + " -------- parse uid cache " + Constants.UID_CACHE_LOCAL_FILE_PREFIX
               + pID + " errors.Clear uid cache map" + e.getMessage());
     } finally {
-      if (channel != null)
+      if (channel != null) {
         try {
           channel.close();
         } catch (IOException e) {
           LOG.error(e.getMessage());
         }
+      }
     }
     map.put(pID, longIntOpenHashMap);
-
-    resetPidCache(pID);
-
   }
 
 
@@ -213,7 +213,10 @@ public class SeqUidCacheMap {
     long md5RawUid = HashFunctions.md5(rawUid.getBytes());
     int seqUid = get(project, md5RawUid);
     if (seqUid == 0) {
+      long st = System.nanoTime();
       seqUid = Integer.parseInt(String.valueOf(IDClient.getInstance().getCreatedId(project, rawUid)));
+      addThriftTime(project, System.nanoTime()-st);
+
       if (seqUid < 0) {
         throw new Exception(project + " " + rawUid + " getCreatedId failed");
       }
@@ -299,6 +302,15 @@ public class SeqUidCacheMap {
     getUidTime.put(project, time);
   }
 
+  private void addThriftTime(String project, long timeUsed) {
+    Long time = getThriftTime.get(project);
+    if (time == null) {
+      time = 0l;
+    }
+    time += timeUsed;
+    getThriftTime.put(project, time);
+  }
+
 
   public long oneReadTaskGetUidNanoTime(String project) {
     return getUidTime.get(project) == null ? 0 : getUidTime.get(project);
@@ -315,29 +327,47 @@ public class SeqUidCacheMap {
     long govome_UidTime = getUidTime.get("govome") == null ? 0 : getUidTime.get("govome");
     long globososo_UidTime = getUidTime.get("globososo") == null ? 0 : getUidTime.get("globososo");
     long sof_dsk_UidTime = getUidTime.get("sof-dsk") == null ? 0 : getUidTime.get("sof-dsk");
-    long sof_newgdp_UidTime = getUidTime.get("v9-sof") == null ? 0 : getUidTime.get("v9-sof");
+    long sof_newgdp_UidTime = getUidTime.get("sof-newgdp") == null ? 0 : getUidTime.get("sof-newgdp");
     long i18n_status_UidTime = getUidTime.get("i18n-status") == null ? 0 : getUidTime.get("i18n-status");
     long sof_newhpnt_UidTime = getUidTime.get("sof-newhpnt") == null ? 0 : getUidTime.get("sof-newhpnt");
+
+    long v9_v9_ThriftTime = getThriftTime.get("v9-v9") == null ? 0 : getThriftTime.get("v9-v9");
+    long govome_ThriftTime = getThriftTime.get("govome") == null ? 0 : getThriftTime.get("govome");
+    long globososo_ThriftTime = getThriftTime.get("globososo") == null ? 0 : getThriftTime.get("globososo");
+    long sof_dsk_ThriftTime = getThriftTime.get("sof-dsk") == null ? 0 : getThriftTime.get("sof-dsk");
+    long sof_newgdp_ThriftTime = getThriftTime.get("sof-newgdp") == null ? 0 : getThriftTime.get("sof-newgdp");
+    long i18n_status_ThriftTime = getThriftTime.get("i18n-status") == null ? 0 : getThriftTime.get("i18n-status");
+    long sof_newhpnt_ThriftTime = getThriftTime.get("sof-newhpnt") == null ? 0 : getThriftTime.get("sof-newhpnt");
 
 
     LOG.info("------UIDCACHE-------- getUid v9-v9:" + v9_v9_UidTime / 1000000 + "ms.govome:" +
             govome_UidTime / 1000000 + "ms.globososo:" + globososo_UidTime / 1000000 + "ms" +
-            ".sof_dsk:" + sof_dsk_UidTime / 1000000 + "ms.v9-sof:" + sof_newgdp_UidTime / 1000000 + "ms" +
+            ".sof_dsk:" + sof_dsk_UidTime / 1000000 + "ms.sof-newgdp:" + sof_newgdp_UidTime / 1000000 + "ms" +
             ".i18n_statu:" + i18n_status_UidTime / 1000000 + "ms.sof_newhpnt:" + sof_newhpnt_UidTime / 1000000 + "ms.");
+    LOG.info("------UIDCACHE-------- getThrift v9-v9:" + v9_v9_ThriftTime / 1000000 + "ms.govome:" +
+            govome_ThriftTime / 1000000 + "ms.globososo:" + globososo_ThriftTime / 1000000 + "ms" +
+            ".sof_dsk:" + sof_dsk_ThriftTime / 1000000 + "ms.sof-newgdp:" + sof_newgdp_ThriftTime / 1000000 + "ms" +
+            ".i18n_statu:" + i18n_status_ThriftTime / 1000000 + "ms.sof_newhpnt:" + sof_newhpnt_ThriftTime / 1000000 + "ms.");
+
     LOG.info("------UIDCACHE-------- cache hit v9-v9: allCount" + allCount_v9_v9 + " hitCount:" +
-            (allCount_v9_v9 - missCount_v9_v9));
+            (allCount_v9_v9 - missCount_v9_v9) + " Total cached uid number: " + map.get("v9-v9")==null?0:map.get("v9-v9").size());
     LOG.info("------UIDCACHE-------- cache hit govome: allCount: " + allCount_govome + " hitCount: " +
-            (allCount_govome - missCount_govome));
+            (allCount_govome - missCount_govome) + " Total cached uid number: " + map.get("govome")==null?0:map.get("govome").size());
     LOG.info("------UIDCACHE-------- cache hit globososo: allCount: " + allCount_globososo + " hitCount: " +
-            (allCount_globososo - missCount_globososo));
+            (allCount_globososo - missCount_globososo)
+            + " Total cached uid number: " + map.get("globososo")==null?0:map.get("globososo").size());
     LOG.info("------UIDCACHE-------- cache hit sof_dsk: allCount: " + allCount_sof_dsk + " hitCount: " +
-            (allCount_sof_dsk - missCount_sof_dsk));
-    LOG.info("------UIDCACHE-------- cache hit v9-sof: allCount: " + allCount_sof_newgdp + " hitCount: " +
-            (allCount_sof_newgdp - missCount_sof_newgdp));
+            (allCount_sof_dsk - missCount_sof_dsk)
+            + " Total cached uid number: " + map.get("sof-dsk")==null?0:map.get("sof-dsk").size());
+    LOG.info("------UIDCACHE-------- cache hit sof-newgdp: allCount: " + allCount_sof_newgdp + " hitCount: " +
+            (allCount_sof_newgdp - missCount_sof_newgdp)
+            + " Total cached uid number: " + map.get("sof-newgdp")==null?0:map.get("sof-newgdp").size());
     LOG.info("------UIDCACHE-------- cache hit i18n_status: allCount: " + allCount_i18n_status + " hitCount: " +
-            (allCount_i18n_status - missCount_i18n_status));
+            (allCount_i18n_status - missCount_i18n_status)
+            + " Total cached uid number: " + map.get("i18n-status")==null?0:map.get("i18n-status").size());
     LOG.info("------UIDCACHE-------- cache hit sof_newhpnt: allCount: " + allCount_sof_newhpnt + " hitCount: " +
-            (allCount_sof_newhpnt - missCount_sof_newhpnt));
+            (allCount_sof_newhpnt - missCount_sof_newhpnt)
+            + " Total cached uid number: " + map.get("sof-newhpnt")==null?0:map.get("sof-newhpnt").size());
 
   }
 
