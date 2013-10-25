@@ -350,25 +350,25 @@ public class SeqUidCacheMap {
             ".sof_dsk:" + sof_dsk_ThriftTime / 1000000 + "ms.sof-newgdp:" + sof_newgdp_ThriftTime / 1000000 + "ms" +
             ".i18n_statu:" + i18n_status_ThriftTime / 1000000 + "ms.sof_newhpnt:" + sof_newhpnt_ThriftTime / 1000000 + "ms.");
 
-    LOG.info("------UIDCACHE-------- cache hit v9-v9: allCount" + allCount_v9_v9 + " hitCount:" +
-            (allCount_v9_v9 - missCount_v9_v9) + " Total cached uid number: " + map.get("v9-v9")==null?0:map.get("v9-v9").size());
+    LOG.info("------UIDCACHE-------- cache hit v9-v9: allCount" + allCount_v9_v9 + " hitCount:" + (allCount_v9_v9 - missCount_v9_v9)
+            + " Total cached uid number: " + (map.get("v9-v9")==null?0:map.get("v9-v9").size()));
     LOG.info("------UIDCACHE-------- cache hit govome: allCount: " + allCount_govome + " hitCount: " +
-            (allCount_govome - missCount_govome) + " Total cached uid number: " + map.get("govome")==null?0:map.get("govome").size());
+            (allCount_govome - missCount_govome) + " Total cached uid number: " + (map.get("govome")==null?0:map.get("govome").size()));
     LOG.info("------UIDCACHE-------- cache hit globososo: allCount: " + allCount_globososo + " hitCount: " +
             (allCount_globososo - missCount_globososo)
-            + " Total cached uid number: " + map.get("globososo")==null?0:map.get("globososo").size());
+            + " Total cached uid number: " + (map.get("globososo")==null?0:map.get("globososo").size()));
     LOG.info("------UIDCACHE-------- cache hit sof_dsk: allCount: " + allCount_sof_dsk + " hitCount: " +
             (allCount_sof_dsk - missCount_sof_dsk)
-            + " Total cached uid number: " + map.get("sof-dsk")==null?0:map.get("sof-dsk").size());
+            + " Total cached uid number: " + (map.get("sof-dsk")==null?0:map.get("sof-dsk").size()));
     LOG.info("------UIDCACHE-------- cache hit sof-newgdp: allCount: " + allCount_sof_newgdp + " hitCount: " +
             (allCount_sof_newgdp - missCount_sof_newgdp)
-            + " Total cached uid number: " + map.get("sof-newgdp")==null?0:map.get("sof-newgdp").size());
+            + " Total cached uid number: " + (map.get("sof-newgdp")==null?0:map.get("sof-newgdp").size()));
     LOG.info("------UIDCACHE-------- cache hit i18n_status: allCount: " + allCount_i18n_status + " hitCount: " +
             (allCount_i18n_status - missCount_i18n_status)
-            + " Total cached uid number: " + map.get("i18n-status")==null?0:map.get("i18n-status").size());
+            + " Total cached uid number: " + (map.get("i18n-status")==null?0:map.get("i18n-status").size()));
     LOG.info("------UIDCACHE-------- cache hit sof_newhpnt: allCount: " + allCount_sof_newhpnt + " hitCount: " +
             (allCount_sof_newhpnt - missCount_sof_newhpnt)
-            + " Total cached uid number: " + map.get("sof-newhpnt")==null?0:map.get("sof-newhpnt").size());
+            + " Total cached uid number: " + (map.get("sof-newhpnt")==null?0:map.get("sof-newhpnt").size()));
 
   }
 
@@ -448,94 +448,101 @@ public class SeqUidCacheMap {
 
 
   public static void main(String[] args) throws Exception {
-    if (args[0].equals("stringtobyte")) {
-      String stringDir_ = "/home/hadoop/uidcache_etl/";
-      String byteDir_ = "/home/hadoop/uidcache_etl_byte/";
-//      String stringDir_ = "/Users/ytang1989/Workspace/testfiles/uidcache_etl/";
-//      String byteDir_ = "/Users/ytang1989/Workspace/testfiles/uidcache_etl_byte/";
+    int allCount_v9_v9 = 100;
+    int missCount_v9_v9 = 50;
+    Map<String, LongIntOpenHashMap> map = new ConcurrentHashMap<String, LongIntOpenHashMap>();
+    //map.put("v9-v9", new LongIntOpenHashMap());
+    LOG.info("------UIDCACHE-------- cache hit v9-v9: allCount" + allCount_v9_v9 + " hitCount:" + (allCount_v9_v9 - missCount_v9_v9)
+            + " Total cached uid number: " + (map.get("v9-v9")==null?0:map.get("v9-v9").size()));
 
-      List<String> pids = new ArrayList<String>();
-      File stringDir = new File(stringDir_);
-      if (stringDir.isDirectory()) {
-        File[] pidFiles = stringDir.listFiles();
-        if (pidFiles != null)
-          for (File pidFile : pidFiles) {
-            if (pidFile.isFile()) {
-              pids.add(pidFile.getName());
-            }
-          }
-      }
-
-      for (String pid : pids) {
-        System.out.println(pid);
-
-        Map<Long, Integer> caches = new HashMap<Long, Integer>();
-        //Read from string format cache
-        BufferedReader bufferedReader = null;
-        try {
-          bufferedReader = new BufferedReader(new FileReader(stringDir_ + pid));
-          String tmp = null;
-          while ((tmp = bufferedReader.readLine()) != null) {
-            int pos = tmp.indexOf("\t");
-            if (pos < 0)
-              continue;
-            caches.put(Long.parseLong(tmp.substring(0, pos)), Integer.parseInt(tmp.substring(pos + 1)));
-          }
-        } catch (FileNotFoundException e) {
-          e.printStackTrace();
-        } catch (IOException e) {
-          e.printStackTrace();
-        } finally {
-          if (bufferedReader != null)
-            try {
-              bufferedReader.close();
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-        }
-
-        // transform to byte[8]byte[2]byte[4]byte[2]/long\tint\n.
-        FileChannel fileChannel = null;
-        try {
-          fileChannel = new RandomAccessFile(byteDir_ + pid, "rw").getChannel();
-          long fileSize = caches.size() * one_line_byte;
-          MappedByteBuffer buffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, fileSize);
-          for (Map.Entry<Long, Integer> entry : caches.entrySet()) {
-            buffer.putLong(entry.getKey());
-            buffer.putChar('\t');
-            buffer.putInt(entry.getValue());
-            buffer.putChar('\n');
-          }
-        } catch (IOException e) {
-          e.printStackTrace();
-        } finally {
-          if (fileChannel != null)
-            try {
-              fileChannel.close();
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-        }
-      }
-    } else if (args[0].equals("test")) {
-      SeqUidCacheMap seqUidCacheMap = SeqUidCacheMap.getInstance();
-      seqUidCacheMap.initCache("sof-newhpnt");
-      System.out.println(seqUidCacheMap.get("sof-newhpnt", 254382050115675l));
-      System.out.println(seqUidCacheMap.get("sof-newhpnt", 133631773197925l));
-      System.out.println(seqUidCacheMap.get("sof-newhpnt", 266009178681034l));
-      System.out.println(seqUidCacheMap.get("sof-newhpnt", 199672445542694l));
-
-      seqUidCacheMap.initCache("ivy");
-      long seqID1 = seqUidCacheMap.getUidCache("ivy", "1");
-      long seqID2 = seqUidCacheMap.getUidCache("ivy", "2");
-
-      System.out.println(seqID1);
-      System.out.println(seqID2);
-
-      seqUidCacheMap.flushCacheToLocal("ivy");
-
-
-    }
+//    if (args[0].equals("stringtobyte")) {
+//      String stringDir_ = "/home/hadoop/uidcache_etl/";
+//      String byteDir_ = "/home/hadoop/uidcache_etl_byte/";
+////      String stringDir_ = "/Users/ytang1989/Workspace/testfiles/uidcache_etl/";
+////      String byteDir_ = "/Users/ytang1989/Workspace/testfiles/uidcache_etl_byte/";
+//
+//      List<String> pids = new ArrayList<String>();
+//      File stringDir = new File(stringDir_);
+//      if (stringDir.isDirectory()) {
+//        File[] pidFiles = stringDir.listFiles();
+//        if (pidFiles != null)
+//          for (File pidFile : pidFiles) {
+//            if (pidFile.isFile()) {
+//              pids.add(pidFile.getName());
+//            }
+//          }
+//      }
+//
+//      for (String pid : pids) {
+//        System.out.println(pid);
+//
+//        Map<Long, Integer> caches = new HashMap<Long, Integer>();
+//        //Read from string format cache
+//        BufferedReader bufferedReader = null;
+//        try {
+//          bufferedReader = new BufferedReader(new FileReader(stringDir_ + pid));
+//          String tmp = null;
+//          while ((tmp = bufferedReader.readLine()) != null) {
+//            int pos = tmp.indexOf("\t");
+//            if (pos < 0)
+//              continue;
+//            caches.put(Long.parseLong(tmp.substring(0, pos)), Integer.parseInt(tmp.substring(pos + 1)));
+//          }
+//        } catch (FileNotFoundException e) {
+//          e.printStackTrace();
+//        } catch (IOException e) {
+//          e.printStackTrace();
+//        } finally {
+//          if (bufferedReader != null)
+//            try {
+//              bufferedReader.close();
+//            } catch (IOException e) {
+//              e.printStackTrace();
+//            }
+//        }
+//
+//        // transform to byte[8]byte[2]byte[4]byte[2]/long\tint\n.
+//        FileChannel fileChannel = null;
+//        try {
+//          fileChannel = new RandomAccessFile(byteDir_ + pid, "rw").getChannel();
+//          long fileSize = caches.size() * one_line_byte;
+//          MappedByteBuffer buffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, fileSize);
+//          for (Map.Entry<Long, Integer> entry : caches.entrySet()) {
+//            buffer.putLong(entry.getKey());
+//            buffer.putChar('\t');
+//            buffer.putInt(entry.getValue());
+//            buffer.putChar('\n');
+//          }
+//        } catch (IOException e) {
+//          e.printStackTrace();
+//        } finally {
+//          if (fileChannel != null)
+//            try {
+//              fileChannel.close();
+//            } catch (IOException e) {
+//              e.printStackTrace();
+//            }
+//        }
+//      }
+//    } else if (args[0].equals("test")) {
+//      SeqUidCacheMap seqUidCacheMap = SeqUidCacheMap.getInstance();
+//      seqUidCacheMap.initCache("sof-newhpnt");
+//      System.out.println(seqUidCacheMap.get("sof-newhpnt", 254382050115675l));
+//      System.out.println(seqUidCacheMap.get("sof-newhpnt", 133631773197925l));
+//      System.out.println(seqUidCacheMap.get("sof-newhpnt", 266009178681034l));
+//      System.out.println(seqUidCacheMap.get("sof-newhpnt", 199672445542694l));
+//
+//      seqUidCacheMap.initCache("ivy");
+//      long seqID1 = seqUidCacheMap.getUidCache("ivy", "1");
+//      long seqID2 = seqUidCacheMap.getUidCache("ivy", "2");
+//
+//      System.out.println(seqID1);
+//      System.out.println(seqID2);
+//
+//      seqUidCacheMap.flushCacheToLocal("ivy");
+//
+//
+//    }
   }
 
 
