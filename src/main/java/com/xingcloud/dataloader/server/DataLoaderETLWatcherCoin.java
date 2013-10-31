@@ -56,6 +56,7 @@ public class DataLoaderETLWatcherCoin {
             ETLScheduleMonitor.ifStillRunn = false;
             LOG.info("watcher exit");
         } catch (Exception e) {
+            //todo: log error and exception stack
             LOG.info("watcher exit with exception", e);
         }
     }
@@ -83,6 +84,7 @@ public class DataLoaderETLWatcherCoin {
                 dataLoaderExecutor.shutdownNow();
                 leave = true;
             } else if (message instanceof NullMessage) {
+                //todo: redis.blpop is a block method. sleep here is unnecessary
                 Thread.sleep(10000);
             } else if (message instanceof PrintTaskMessage) {
                 dataLoaderExecutor.printStats();

@@ -99,6 +99,7 @@ public class MessageQueue {
         Jedis jedis = null;
         try {
             jedis = initJedis();
+          //todo: to get all messages, range should be [0, -1]
             return (jedis.lrange(ip, 0, 1)).toString();
         } catch (Exception e) {
             LOG.error("getAllMessage catch exception", e);

@@ -156,6 +156,7 @@ public class MongodbDriver {
 
     static public DBCursor getFinishStats(String date, String ip) {
         DBObject queryObject = new BasicDBObject();
+        //todo: hostname似乎比ip更好？
         queryObject.put("inet_ip", ip);
         queryObject.put("date", date);
         queryObject.put("stats", "finish");

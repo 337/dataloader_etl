@@ -2,7 +2,7 @@ package com.xingcloud.dataloader.hbase.table.user;
 
 import com.carrotsearch.hppc.LongIntOpenHashMap;
 import com.xingcloud.dataloader.lib.Event;
-import com.xingcloud.dataloader.lib.SeqUidCacheMap;
+import com.xingcloud.dataloader.lib.SeqUidCacheMapV2;
 import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import org.apache.commons.logging.Log;
@@ -131,7 +131,7 @@ public class CoinPromotionCacheMap {
         for(Event event: eventList){
             String uid=event.getUid();
             try {
-                long seqUid= SeqUidCacheMap.getInstance().getUidCache(project,uid);
+                long seqUid= SeqUidCacheMapV2.getInstance().getUidCache(project,uid);
                 LongIntOpenHashMap projectMap=map.get(project);
                 if(projectMap==null){
                     projectMap=new LongIntOpenHashMap();

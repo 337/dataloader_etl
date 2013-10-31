@@ -5,7 +5,7 @@ import com.xingcloud.dataloader.hbase.table.user.CoinInitialStateCacheMap;
 import com.xingcloud.dataloader.hbase.table.user.CoinPromotionCacheMap;
 import com.xingcloud.dataloader.hbase.tableput.TablePut;
 import com.xingcloud.dataloader.lib.Event;
-import com.xingcloud.dataloader.lib.SeqUidCacheMap;
+import com.xingcloud.dataloader.lib.SeqUidCacheMapV2;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
@@ -95,7 +95,7 @@ public class CoinProcessTask implements Runnable{
         }
         if(eventStr.contains("audit.produce.buy.coin")||eventStr.contains("audit.produce.promotion.coin")){
             try {
-                long seqUid= SeqUidCacheMap.getInstance().getUidCache(project,uid);
+                long seqUid= SeqUidCacheMapV2.getInstance().getUidCache(project,uid);
                 long samplingSeqUid= UidMappingUtil.getInstance().decorateWithMD5(seqUid);
                 int coin_buy_val=0,coin_promotion_val=0;
                 if(event[2].equals("buy")){
@@ -128,7 +128,7 @@ public class CoinProcessTask implements Runnable{
             }
         }else if(eventStr.contains("audit.consume.cost")){
             try {
-                long seqUid=SeqUidCacheMap.getInstance().getUidCache(project,uid);
+                long seqUid=SeqUidCacheMapV2.getInstance().getUidCache(project,uid);
                 long samplingSeqUid=UidMappingUtil.getInstance().decorateWithMD5(seqUid);
                 int coin_initial_status= CoinInitialStateCacheMap.getInstance().getVal(project,samplingSeqUid);
                 int coin_buy_val=CoinBuyCacheMap.getInstance().getVal(project,samplingSeqUid);

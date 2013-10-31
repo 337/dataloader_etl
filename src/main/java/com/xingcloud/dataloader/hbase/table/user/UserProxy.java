@@ -72,7 +72,7 @@ public class UserProxy {
     private long getUserSeqUid(Event event) throws Exception {
         Long seqUid = event.getSeqUid();
         if (seqUid == null) {
-            seqUid = (long)SeqUidCacheMap.getInstance().getUidCache(project, event.getUid());
+            seqUid = (long)SeqUidCacheMapV2.getInstance().getUidCache(project, event.getUid());
             event.setSeqUid(seqUid);
         }
         return seqUid;

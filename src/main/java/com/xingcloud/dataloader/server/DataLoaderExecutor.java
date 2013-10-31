@@ -63,6 +63,7 @@ public class DataLoaderExecutor extends ThreadPoolExecutor {
     public void shutdown() {
         getQueue().clear();
         super.shutdown();
+        //todo: use awaitTermination to wait for previously submitted tasks to complete execution
     }
 
     public String getRunningTask() {

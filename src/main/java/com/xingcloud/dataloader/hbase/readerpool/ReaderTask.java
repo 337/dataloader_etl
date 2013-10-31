@@ -76,7 +76,7 @@ public class ReaderTask implements Runnable {
 
       RefBitMapRebuild.getInstance().rebuildSixtyDays(project, date, index);
 
-      SeqUidCacheMap.getInstance().initCache(project);
+      SeqUidCacheMapV2.getInstance().initCache(project);
 
       int processCoinThreadNum = 1;
       ExecutorService audit_exec = Executors.newFixedThreadPool(processCoinThreadNum);
@@ -119,25 +119,25 @@ public class ReaderTask implements Runnable {
 
       //每4个小时flush  cache到本地一次，但是内存中的缓存不清空
       if ((index + 1) % flushInternal == 0)
-        SeqUidCacheMap.getInstance().flushCacheToLocal(project);
+        SeqUidCacheMapV2.getInstance().flushCacheToLocal(project);
 
       //每天检查一次该项目的缓存是否需要重置
 //      if (index == flushInternal * 3.5)
       if (index % flushInternal == 0)
-        SeqUidCacheMap.getInstance().resetPidCache(project);
+        SeqUidCacheMapV2.getInstance().resetPidCache(project);
 
       LOG.info("finish reading and flushing events the project :" + project + " using " + this.timeTotal + " ms," +
-              "getid using " + SeqUidCacheMap.getInstance().oneReadTaskGetUidNanoTime(project) / 1000000 + " ms," +
+              "getid using " + SeqUidCacheMapV2.getInstance().oneReadTaskGetUidNanoTime(project) / 1000000 + " ms," +
               "flusing event and user using " + (System.currentTimeMillis() - t3) + "ms. with list:" + sb.toString());
     } catch (Exception e) {
       LOG.error(project + " read task error. " + e.getMessage(), e);
-    } finally {
+//    } finally {
       //跑完一个项目，关掉这个项目在SeqUidCacheMap里面的MysqlConnection
-      try {
-        SeqUidCacheMap.getInstance().closeOneProjectConnection(project);
-      } catch (SQLException e) {
-        LOG.error(project + "closeOneProjectConnection error.", e);
-      }
+//      try {
+//        SeqUidCacheMap.getInstance().closeOneProjectConnection(project);
+//      } catch (SQLException e) {
+//        LOG.error(project + "closeOneProjectConnection error.", e);
+//      }
     }
 
   }

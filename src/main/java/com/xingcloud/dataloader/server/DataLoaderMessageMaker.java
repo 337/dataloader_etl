@@ -104,7 +104,7 @@ public class DataLoaderMessageMaker {
 
     //assign all the task to all node and check weather the task have run
     public void fillTask(String date, int si, int ei, String projectList, String runType, String ip) {
-
+        //todo: boolean array is enough
         int[] all = new int[290];
         DBCursor cursor = MongodbDriver.getFinishStats(date, ip);
         while (cursor.hasNext()) {

@@ -2,7 +2,7 @@ package com.xingcloud.dataloader.hbase.table;
 
 import com.xingcloud.dataloader.StaticConfig;
 import com.xingcloud.dataloader.lib.Event;
-import com.xingcloud.dataloader.lib.SeqUidCacheMap;
+import com.xingcloud.dataloader.lib.SeqUidCacheMapV2;
 import com.xingcloud.dataloader.lib.User;
 import com.xingcloud.util.Constants;
 import com.xingcloud.util.RandSpeUidMd5;
@@ -127,7 +127,7 @@ public class DeuTable implements MainTable {
         } else {
             Long seqUid = event.getSeqUid();
             if (seqUid == null) {
-                seqUid = (long) SeqUidCacheMap.getInstance().getUidCache(project, event.getUid());
+                seqUid = (long) SeqUidCacheMapV2.getInstance().getUidCache(project, event.getUid());
                 event.setSeqUid(seqUid);
             }
         }

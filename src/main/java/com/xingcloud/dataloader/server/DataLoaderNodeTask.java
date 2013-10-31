@@ -85,6 +85,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
 
   public void run() {
+      //todo: simplify the code
     try {
       String publicIp = NetManager.getPublicIp();
       String siteIp = NetManager.getSiteLocalIp();
@@ -93,6 +94,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
       //存储mongodb启动记录
       DBObject beginObject = new BasicDBObject();
+        //todo: hostname is better than ip address?
       beginObject.put("public_ip", publicIp);
       beginObject.put("inet_ip", siteIp);
       beginObject.put("date", date);
@@ -136,6 +138,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
 
       //读取所有的日志并存储到中间类TablePut中去,并flush到本地
+      //todo: tablePutPool -> local variable in buildProjectTablePut()
       boolean readerFinish = buildProjectTablePut(tablePutPool, projectAppidMatch, v4LogsMaps);
 
       long t2 = System.currentTimeMillis();
@@ -159,8 +162,8 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
         CurrencyManager.cleanUp();
 
       //任务结束后，打印出cache情况,并清空
-      SeqUidCacheMap.getInstance().printStats();
-      SeqUidCacheMap.getInstance().resetStats();
+      SeqUidCacheMapV2.getInstance().printStats();
+      SeqUidCacheMapV2.getInstance().resetStats();
 
       //存储mongodb结束记录
       DBObject finishObject = new BasicDBObject();
@@ -286,6 +289,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       File dir = new File(pathPrefix);
       if (dir.exists()) {
         File[] fileList = dir.listFiles();
+        //todo: fileList may be null
         for (File file : fileList) {
           if (file.isDirectory()) {
             appidSet.add(file.getName());
@@ -299,6 +303,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       File dir = new File(pathPrefix);
       if (dir.exists()) {
         File[] fileList = dir.listFiles();
+        //todo: fileList may be null
         for (File file : fileList) {
           if (file.isDirectory()) {
             appidSet.add(file.getName());
