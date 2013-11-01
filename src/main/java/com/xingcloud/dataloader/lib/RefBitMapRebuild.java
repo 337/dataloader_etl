@@ -1,22 +1,12 @@
 package com.xingcloud.dataloader.lib;
 
-import com.sun.org.apache.xalan.internal.xsltc.dom.SimpleResultTreeImpl;
 import com.xingcloud.dataloader.hbase.table.user.UserPropertyBitmaps;
-import com.xingcloud.redis.RedisShardedPoolResourceManager;
 import com.xingcloud.util.Constants;
-import com.xingcloud.util.ProjectInfo;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.ShardedJedis;
 
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -52,14 +42,14 @@ public class RefBitMapRebuild {
       rebuildSixtyDaysActiveUsersFromMySQL(project, date);
     } else {
       if (UserPropertyBitmaps.getInstance().ifPropertyNull(project, User.refField)) {
-        rebuildSixtyDaysActiveUsersFromLocalFile(project, canRecoverFromLocalFiles);
+        rebuildSixtyDaysActiveUsersFromLocalFileV2(project, canRecoverFromLocalFiles);
       }
     }
   }
 
   private void rebuildSixtyDaysActiveUsersFromMySQL(String project, String date) {
     dumpSixtyDaysActiveUsersToLocal(project, date);
-    rebuildSixtyDaysActiveUsersFromLocalFile(project, new String[]{User.refField});
+    rebuildSixtyDaysActiveUsersFromLocalFileV2(project, new String[]{User.refField});
   }
 
   private void dumpSixtyDaysActiveUsersToLocal(String project, String date) {
@@ -169,124 +159,91 @@ public class RefBitMapRebuild {
   }
 
 
-  public static void main(String[] args) throws InterruptedException, IOException, URISyntaxException, ParseException {
+  private void rebuildSixtyDaysActiveUsersFromLocalFileV2(String project, String[] properties) {
+    for (String property : properties) {
+      UserPropertyBitmaps.getInstance().resetPropertyMap(project, property);
+      UserPropertyBitmaps.getInstance().initPropertyMap(project, property);
+    }
 
-    String project_ = "sof-dsk";
-    String mysqlHost_ = "192.168.1.147";
-    String date_="20130808";
-    String filePath_ = "/tmp/test";
+    long beginning = System.currentTimeMillis();
+    long maxUid = Long.MIN_VALUE, minUid = Long.MAX_VALUE;
 
-    String sqlCMD = "mysql -uxingyun -pOhth3cha --database "+getMySQLDBName(project_) + " -h" + mysqlHost_ + " -ss " +
-            "-e\"SELECT" +
-            " uid FROM last_login_time where val>=" + TimeIndexV2.getSixtyDaysBefore(date_+"000000") + " and val<" +
-            TimeIndexV2.getRightHoursBefore(date_+"000000") + "\" > " + filePath_;
-    System.out.println(sqlCMD);
+    //first, determine the max uid and min uid
+    for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
+      String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS + File.separator + project + "_" + mysqlHost;
+      LOG.info(project + " read " + filePath);
 
-    System.out.println(UidMappingUtil.getInstance().nodes());
-
-    if (args.length != 0) {
-      if (args[0].equals("test")) {
-        //    getInstance().rebuildSixtyDays("sof-newgdp", "20130715", 0);
-        getInstance().rebuildSixtyDays("sof-newgdp", "20130715", 4);
-        int[] innerUids = new int[]{6781865,
-                6617775,
-                6843889,
-                6379767,
-                6607213,
-                2025759,
-                6881009,
-                3733721,
-                6814597,
-                6905067, 8978181};
-        for (int innerUid : innerUids) {
-          if (!UserPropertyBitmaps.getInstance().isPropertyHit("sof-newgdp", 8978181, User.ref0Field))
-            System.out.println("error " + innerUid);
-        }
-      } else if (args[0].equals("init")) {
-        ShardedJedis shardedJedis = null;
-        Set<String> pids = new HashSet<String>();
-        try {
-          shardedJedis = RedisShardedPoolResourceManager.getInstance().getCache(Constants.REDIS_DB_NUM);
-          Collection<Jedis> allShards = shardedJedis.getAllShards();
-          for (Jedis jedis : allShards) {
-            pids.addAll(jedis.keys("ui.check.*"));
+      BufferedReader bufferedReader = null;
+      try {
+        bufferedReader = new BufferedReader(new FileReader(filePath));
+        String tmpLine = null;
+        while ((tmpLine = bufferedReader.readLine()) != null) {
+          long innerUid = Long.parseLong(tmpLine) & 0xffffffffl;
+          if (innerUid > maxUid) {
+            maxUid = innerUid;
           }
-        } catch (Exception e) {
-          RedisShardedPoolResourceManager.getInstance().returnBrokenResource(shardedJedis);
-          shardedJedis = null;
-        } finally {
-          RedisShardedPoolResourceManager.getInstance().returnResource(shardedJedis);
-        }
-        long currentTime = System.currentTimeMillis();
-        String nowDate = args[1];
-        for (String pid : pids) {
-          getInstance().dumpSixtyDaysActiveUsersToLocal(pid.replace("ui.check.", ""), nowDate);
-        }
-        System.out.println("all finished.using " + (System.currentTimeMillis() - currentTime) / 1000 + "s.");
-      } else if (args[0].equals("overflow")) {
-        ShardedJedis shardedJedis = null;
-        Set<String> pids = new HashSet<String>();
-        try {
-          shardedJedis = RedisShardedPoolResourceManager.getInstance().getCache(Constants.REDIS_DB_NUM);
-          Collection<Jedis> allShards = shardedJedis.getAllShards();
-          for (Jedis jedis : allShards) {
-            pids.addAll(jedis.keys("ui.check.*"));
+          if (innerUid < minUid) {
+            minUid = innerUid;
           }
-        } catch (Exception e) {
-          RedisShardedPoolResourceManager.getInstance().returnBrokenResource(shardedJedis);
-          shardedJedis = null;
-        } finally {
-          RedisShardedPoolResourceManager.getInstance().returnResource(shardedJedis);
         }
-        for (String pid : pids) {
-          System.out.println(pid.replace("ui.check.", ""));
+      } catch (IOException e) {
+        LOG.error(e.getMessage(), e);
+      } finally {
+        if (bufferedReader != null) {
           try {
-            getInstance().rebuildSixtyDaysActiveUsersFromLocalFile(pid.replace("ui.check.", ""), new String[]{"ref"});
-          } catch (Exception e) {
-            e.printStackTrace();
+            bufferedReader.close();
+          } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
           }
         }
       }
-    } else {
-      String project = "ddt";
-      String property = "ref0";
-      List<Long> innerUids = new ArrayList<Long>();
-      for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
-        String filePath = "/Users/ytang1989/Workspace/testfiles/hadoop/60days_active_users/" + File.separator + project + "_" + mysqlHost;
-        BufferedReader bufferedReader = null;
-        System.out.println(filePath);
-        try {
-          bufferedReader = new BufferedReader(new FileReader(filePath));
-          String tmpLine = null;
-          while ((tmpLine = bufferedReader.readLine()) != null) {
-            long innerUid = Long.parseLong(tmpLine) & 0xffffffffl;
+    }
+
+    LOG.info("max uid: " + maxUid + ", min uid: " + minUid);
+
+    //next, initialize bitmap
+    if (maxUid != Long.MIN_VALUE && minUid != Long.MAX_VALUE) {
+      for (String property : properties) {
+        UserPropertyBitmaps.getInstance().markPropertyHit(project, minUid, property);
+        UserPropertyBitmaps.getInstance().markPropertyHit(project, maxUid, property);
+      }
+    }
+
+    //the last...
+    for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
+      String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS + File.separator + project + "_" + mysqlHost;
+      LOG.info(project + " read " + filePath);
+
+      BufferedReader bufferedReader = null;
+      try {
+        bufferedReader = new BufferedReader(new FileReader(filePath));
+        String tmpLine = null;
+        while ((tmpLine = bufferedReader.readLine()) != null) {
+          long innerUid = Long.parseLong(tmpLine) & 0xffffffffl;
+          for (String property : properties) {
             UserPropertyBitmaps.getInstance().markPropertyHit(project, innerUid, property);
-            innerUids.add(innerUid);
           }
-        } catch (FileNotFoundException e) {
-          //do thing
-        } catch (IOException e) {
-          LOG.error(e.getMessage(), e);
-        } finally {
-          if (bufferedReader != null)
-            try {
-              bufferedReader.close();
-            } catch (IOException e) {
-              LOG.error(e.getMessage(), e);
-            }
+        }
+      } catch (IOException e) {
+        LOG.error(e.getMessage(), e);
+      } finally {
+        if (bufferedReader != null) {
+          try {
+            bufferedReader.close();
+          } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+          }
         }
       }
-      for (long innerUid : innerUids) {
-        if (!UserPropertyBitmaps.getInstance().isPropertyHit(project, innerUid, property))
-          System.out.println("error:" + innerUid);
-      }
+    }
 
-
-
+    System.out.println(project + " rebuild ref,nation,register_time,geoip from local file using " +
+      (System.currentTimeMillis() - beginning) + "ms.");
   }
 
+
+  public static void main(String... args) {
+    RefBitMapRebuild refBitMapRebuild = new RefBitMapRebuild();
+    refBitMapRebuild.rebuildSixtyDaysActiveUsersFromLocalFileV2("ddt", refBitMapRebuild.canRecoverFromLocalFiles);
   }
 }
-
-
-
