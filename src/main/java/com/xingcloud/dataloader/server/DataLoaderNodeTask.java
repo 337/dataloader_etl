@@ -212,6 +212,11 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
     Set<String> projectSet = new HashSet<String>();
     projectSet.addAll(projectAppidMatch.keySet());
     projectSet.addAll(v4LogsMaps.keySet());
+
+    //临时忽略对项目gbanner的处理
+    LOG.info("temporarily ignore project: gbanner");
+    projectSet.remove("gbanner");
+
     for (String project : projectSet) {
       TablePut tablePut = tablePutPool.getTablePut(project, date, index);
       List<String> appids = projectAppidMatch.get(project) == null ? new ArrayList<String>() : projectAppidMatch.get(project);
