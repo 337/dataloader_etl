@@ -12,7 +12,7 @@
         <password>xa</password>
         <db>user_info</db>
     </mysql>
-    <reader>8</reader>
+    <reader>16</reader>
     <submiter>10</submiter>
 </Root>
 
