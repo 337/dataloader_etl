@@ -123,7 +123,7 @@ public class ReaderTask implements Runnable {
 
       //每天检查一次该项目的缓存是否需要重置
 //      if (index == flushInternal * 3.5)
-      if (index % flushInternal == 0)
+      if ((index + 2) % flushInternal == 0)
         SeqUidCacheMapV2.getInstance().resetPidCache(project);
 
       LOG.info("finish reading and flushing events the project :" + project + " using " + this.timeTotal + " ms," +
