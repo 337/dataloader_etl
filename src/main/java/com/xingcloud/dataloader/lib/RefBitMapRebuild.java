@@ -1,12 +1,21 @@
 package com.xingcloud.dataloader.lib;
 
 import com.xingcloud.dataloader.hbase.table.user.UserPropertyBitmaps;
+import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.util.Constants;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
+import org.apache.commons.dbcp.DelegatingStatement;
+import org.apache.commons.dbutils.DbUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -92,6 +101,83 @@ public class RefBitMapRebuild {
     LOG.info(project + " dump  60 active from mysql  using " + (System.currentTimeMillis() - currentTime) + " " +
             "ms.");
 
+  }
+
+
+  private void dumpSixtyDaysActiveUsersToLocalV2(String project, String date) {
+    //当mysql异常时，sleep时间，单位为ms
+    final int SLEEP_MILLIS_IF_MYSQL_EXCEPTION = 5000;
+    long startTime = System.currentTimeMillis();
+
+    List<String> nodeList = UidMappingUtil.getInstance().nodes();
+    String[] nodes = nodeList.toArray(new String[nodeList.size()]);
+    shuffle(nodes);
+
+    String sqlString = null;
+    try {
+      sqlString = "select uid from last_login_time where val>=" + TimeIndexV2.getSixtyDaysBefore(date + "000000") +
+        " and val<" + TimeIndexV2.getRightHoursBefore(date + "000000");
+    } catch (ParseException parseExc) {
+      LOG.error("parse date failed. project: " + project + ", date: " + date +
+        parseExc.getMessage(), parseExc);
+      return;
+    }
+
+    Connection connection;
+    com.mysql.jdbc.Statement statement;
+    ResultSet resultSet;
+    BufferedWriter bufferedWriter;
+
+    for (String node: nodes) {
+      String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS + File.separator + project + "_" + node;
+
+      int tryTimes = 1;
+      boolean successful = false;
+      while (!successful) {
+        connection = null; statement = null; resultSet = null; bufferedWriter = null;
+        try {
+          connection = MySql_16seqid.getInstance().getConnByNode(project, node);
+          Statement tmpStatement = connection.createStatement();
+          tmpStatement = ((DelegatingStatement)tmpStatement).getInnermostDelegate();
+          statement = (com.mysql.jdbc.Statement)tmpStatement;
+          //下面的语句是为了避免jdbc一次性取回所有数据导致OOM
+          statement.enableStreamingResults();
+
+          resultSet = statement.executeQuery(sqlString);
+          bufferedWriter = new BufferedWriter(new FileWriter(new File(filePath)));
+          while (resultSet.next()) {
+            bufferedWriter.write(resultSet.getLong(1) + "\n");
+          }
+          bufferedWriter.flush();
+
+          successful = true;
+        } catch (SQLException sqlex) {
+          LOG.error("dump 60 days' active users failed." +
+            " project: " + project + ", date: " + date + ", node: " + node +
+            " retry in " + SLEEP_MILLIS_IF_MYSQL_EXCEPTION * tryTimes / 1000 +
+            " seconds. " + sqlex.getMessage(), sqlex);
+        } catch (IOException ioex) {
+          LOG.error("dump 60 days' active users failed." +
+            " project: " + project + ", date: " + date + ", node: " + node +
+            " retry in " + SLEEP_MILLIS_IF_MYSQL_EXCEPTION * tryTimes / 1000 +
+            " seconds. " + ioex.getMessage(), ioex);
+        } finally {
+          IOUtils.closeQuietly(bufferedWriter);
+          DbUtils.closeQuietly(connection, statement, resultSet);
+        }
+
+        if (!successful) {
+          try {
+            Thread.sleep(SLEEP_MILLIS_IF_MYSQL_EXCEPTION * tryTimes);
+            tryTimes = (tryTimes << 1) & Integer.MAX_VALUE;
+          } catch (InterruptedException ie) {
+            successful = true;
+          }
+        }
+      }
+    }
+
+    LOG.info(project + " dump 60 days' active users from mysql using " + (System.currentTimeMillis() - startTime) + "ms.");
   }
 
   private void rebuildSixtyDaysActiveUsersFromLocalFile(String project, String[] properties) {
@@ -237,7 +323,7 @@ public class RefBitMapRebuild {
       }
     }
 
-    System.out.println(project + " rebuild ref,nation,register_time,geoip from local file using " +
+    LOG.info(project + " rebuild ref,nation,register_time,geoip from local file using " +
       (System.currentTimeMillis() - beginning) + "ms.");
   }
 
