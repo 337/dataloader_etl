@@ -272,6 +272,8 @@ public class RefBitMapRebuild {
             minUid = innerUid;
           }
         }
+      } catch (FileNotFoundException fnfe) {
+        LOG.warn(fnfe.getMessage(), fnfe);
       } catch (IOException e) {
         LOG.error(e.getMessage(), e);
       } finally {
@@ -310,6 +312,8 @@ public class RefBitMapRebuild {
             UserPropertyBitmaps.getInstance().markPropertyHit(project, innerUid, property);
           }
         }
+      } catch (FileNotFoundException fnfe) {
+        LOG.warn(fnfe.getMessage(), fnfe);
       } catch (IOException e) {
         LOG.error(e.getMessage(), e);
       } finally {

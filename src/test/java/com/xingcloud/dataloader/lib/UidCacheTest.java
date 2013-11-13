@@ -53,7 +53,10 @@ public class UidCacheTest {
     String project = "test_project";
 
     Map<String, LongIntOpenHashMap> map = SeqUidCacheMapV2.getInstance().getMap();
-    LongIntOpenHashMap projectMap = map.get(project);
+    LongIntOpenHashMap projectMap = new LongIntOpenHashMap();
+    map.put(project, projectMap);
+
+    long start = System.currentTimeMillis();
 
     for (int i = Integer.MAX_VALUE, count = 0; count < 10000; i--, count++) {
       try {
@@ -64,5 +67,7 @@ public class UidCacheTest {
         e.printStackTrace();
       }
     }
+
+    System.out.println(System.currentTimeMillis() - start);
   }
 }

@@ -3,7 +3,7 @@ package com.xingcloud.dataloader;
 import com.xingcloud.dataloader.hbase.table.DeuTable;
 import com.xingcloud.dataloader.lib.HdfsPath;
 import com.xingcloud.hbase.HBaseOperation;
-import com.xingcloud.id.c.IDClient;
+import com.xingcloud.id.c.IdClient;
 import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.redis.RedisShardedPoolResourceManager;
 import com.xingcloud.util.Constants;
@@ -188,7 +188,9 @@ public class BuildTableAdmin {
                 } catch (TableExistsException e) {
                     LOG.info("Other dataloader has created this hbase table.");
                 }
-                IDClient.getInstance().createdb(project);
+
+                IdClient.getInstance().createProject(project);
+
                 int tryCount = 3;
                 //三次尝试建库，不成功则发邮件
                 for (int i = 0; i < tryCount; i++) {

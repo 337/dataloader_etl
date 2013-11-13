@@ -2,7 +2,8 @@ package com.xingcloud.dataloader.lib;
 
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntOpenHashMap;
-import com.xingcloud.id.c.IDClient;
+import com.xingcloud.id.c.IdClient;
+import com.xingcloud.id.pub.IdResult;
 import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.util.Constants;
 import com.xingcloud.util.HashFunctions;
@@ -215,7 +216,10 @@ public class SeqUidCacheMap {
     int seqUid = get(project, md5RawUid);
     if (seqUid == 0) {
       long st = System.nanoTime();
-      seqUid = Integer.parseInt(String.valueOf(IDClient.getInstance().getCreatedId(project, rawUid)));
+
+      IdResult idResult = IdClient.getInstance().getOrCreateId(project, rawUid);
+      seqUid = Integer.parseInt(String.valueOf(idResult.getId()));
+
       addThriftTime(project, System.nanoTime()-st);
 
       if (seqUid < 0) {

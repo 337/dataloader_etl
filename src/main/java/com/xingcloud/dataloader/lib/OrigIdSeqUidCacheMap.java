@@ -1,7 +1,8 @@
 package com.xingcloud.dataloader.lib;
 
 
-import com.xingcloud.id.c.IDClient;
+import com.xingcloud.id.c.IdClient;
+import com.xingcloud.id.pub.IdResult;
 import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.util.Constants;
 import com.xingcloud.xa.uidmapping.UidMappingUtil;
@@ -177,7 +178,8 @@ public class OrigIdSeqUidCacheMap {
             LOG.info("not hit "+rawUid);
             //seqUid= random.nextLong();
             //if(seqUid<0)seqUid=seqUid*(-1);
-            seqUid = Long.parseLong(String.valueOf(IDClient.getInstance().getCreatedId(project, rawUid)));
+            IdResult idResult = IdClient.getInstance().getOrCreateId(project, rawUid);
+            seqUid = idResult.getId();
             if (seqUid < 0) {
                 //throw new Exception(project + " " + rawUid + " getCreatedId failed");
             }
