@@ -281,7 +281,8 @@ public class SeqUidCacheMapV2 {
       // 本地缓存不在的uid；执行chechInHot和coldtohot
       if (!(project.equals("govome")
         || project.equals("globososo")
-        || project.equals("sof-newgdp"))) {
+        || project.equals("sof-newgdp")
+        || project.equals("i18n-status"))) {
         if (!checkInHot(project, innerUid)) {
           cold2Hot(project, UidMappingUtil.getInstance().decorateWithMD5(innerUid));
         }
