@@ -1,7 +1,6 @@
 package com.xingcloud.dataloader.lib;
 
-import com.xingcloud.id.c.IdClient;
-import com.xingcloud.id.pub.IdResult;
+import com.xingcloud.id.c.IDClient;
 import com.xingcloud.mysql.MySql_16seqid;
 import com.xingcloud.util.Constants;
 import com.xingcloud.util.HashFunctions;
@@ -230,8 +229,7 @@ public class SeqUidCacheMapV2 {
     long innerUid = -1;
     while (innerUid < 0) {
       try {
-        IdResult idResult = IdClient.getInstance().getOrCreateId(project, rawUid);
-        innerUid = idResult.getId();
+        innerUid = IDClient.getInstance().getCreatedId(project, rawUid);
         if (innerUid < 0) {
           LOG.error("get inner uid from id service return -1." +
             " project: " + project + ", rawUid: " + rawUid +
