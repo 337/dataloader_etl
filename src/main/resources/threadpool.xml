@@ -1,4 +1,0 @@
-<pools>
-    <pool id="query_therad" name="XqueryThread" threads="150" />
-    <pool id="sync_therad" name="MetricSyncThread" threads="30" />
-</pools>
