@@ -21,30 +21,18 @@ import java.util.*;
 public class LogParser {
   static enum LogType {SITE_DATA, STORE_LOG, V4_LOG, DEFAULT}
 
-  ;
-
   public static final Log LOG = LogFactory.getLog(LogParser.class);
   public static final int fieldLength = 32;
 
-  private static final String UTM_SOURCE = "utm_source=";
-
   private LogType type = LogType.DEFAULT;
 
-  public static long dayTimestampLength = 86400000L;
   public int wrongMax = 10;
   public int wrong = 0;
   private String log;
   private ProjectInfo projectInfo;
   private ObjectMapper objectMapper;
 
-  private String xafrom_ref = "xafrom=";
-  private String sgfrom_ref = "sgfrom=";
-  private String facebook_age_ref_start = "{";
-
   private String geoip = "geoip";
-
-  private int refSize = 5;
-  private int rawRefColonSplitIndex = 2;
 
   public LogParser(String type) {
     init(type, null);
@@ -321,65 +309,8 @@ public class LogParser {
     return new Event(uid, event, value, ts, objectMapper.writeValueAsString(refs));
   }
 
-  //分析ref字段，以xafrom=开头，且xafrom=之后有值，则放入ref0-ref4的5个属性  ;如果以sgfrom=开头，则更新到ref属性里
-  //xafrom的处理，如果存在*号，取*号之后的内容的第二个；号之后的的内容；没有*号，就直接取第二个；号的以后的内容
   private Map<String, String> analyseRef(String refContent) {
-    refContent = refContent.trim();
-    Map<String, String> refs = new HashMap<String, String>();
-    if (refContent.startsWith(xafrom_ref)) {
-      if (refContent.length() > xafrom_ref.length()) {
-        int lastStarIndex = refContent.lastIndexOf("*");
-        String[] refTmps = null;
-        if (lastStarIndex == -1)
-          refTmps = refContent.substring(xafrom_ref.length()).split(";");
-        else
-          refTmps = refContent.substring(lastStarIndex + 1).split(";");
-
-        if (refTmps.length <= rawRefColonSplitIndex) {
-          String xaFromValue = refContent.substring(xafrom_ref.length());
-          if (xaFromValue.startsWith(UTM_SOURCE)) {
-            // 处理这种情况： xafrom=utm_source=tapjoy
-            refs.put("ref0", xaFromValue.substring(UTM_SOURCE.length()).trim());
-          } else {
-            refs.put("ref", xaFromValue);
-          }
-        }
-        for (int i = rawRefColonSplitIndex; i < refTmps.length; i++) {
-          if (i < rawRefColonSplitIndex + refSize - 1) {
-            if (refTmps[i].trim().length() > 0)
-              refs.put("ref" + (i - rawRefColonSplitIndex), refTmps[i].trim());
-          } else {
-            String content = refs.get("ref" + (refSize - 1));
-            if (content == null)
-              refs.put("ref" + (refSize - 1), refTmps[i].trim());
-            else
-              refs.put("ref" + (refSize - 1), content + ";" + refTmps[i].trim());
-          }
-        }
-        String finalRef4 = refs.get("ref" + (refSize - 1));
-        if (finalRef4 != null) {
-          if (finalRef4.trim().length() == 0 || finalRef4.trim().replaceAll(";", "").length() == 0)
-            refs.remove("ref" + (refSize - 1));
-        }
-      }
-
-    } else if (refContent.startsWith(sgfrom_ref)) {
-      if (refContent.length() > sgfrom_ref.length())
-        refs.put("ref", refContent.substring(sgfrom_ref.length()).trim());
-    } else if (refContent.startsWith(facebook_age_ref_start)) {
-      try {
-        Map facebook_ref_age_map = objectMapper.readValue(refContent, Map.class);
-        if(facebook_ref_age_map.containsKey("app") && facebook_ref_age_map.containsKey("t"))
-          refs.put("ref0","f");
-      } catch (IOException e) {
-        LOG.warn(log, e);
-        refs.put("ref", refContent);
-      }
-    } else {
-      if (refContent.length() > 0)
-        refs.put("ref", refContent);
-    }
-    return refs;
+      return RefParser.parse(refContent);
   }
 
   /**
