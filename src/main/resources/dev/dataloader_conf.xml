@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Root>
-    <messagehost>10.1.1.153</messagehost>
+    <messagehost>10.1.20.174</messagehost>
     <site_data>/data/htdocs/elex_analytics/site_data</site_data>
     <store_log>/data/htdocs/elex_analytics/store_log</store_log>
     <v4_log>/data/htdocs/elex_analytics/v4_log</v4_log>

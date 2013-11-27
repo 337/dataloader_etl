@@ -1,19 +1,14 @@
 package com.xingcloud.dataloader.hbase.table.user;
 
-import com.xingcloud.dataloader.hbase.readerpool.ReaderTask;
 import com.xingcloud.dataloader.lib.*;
-import com.xingcloud.id.c.IDClient;
-import com.xingcloud.redis.RedisShardedPoolResourceManager;
 import com.xingcloud.util.Common;
 import com.xingcloud.util.Constants;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import redis.clients.jedis.ShardedJedis;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

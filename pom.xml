@@ -92,7 +92,13 @@
         <dependency>
             <groupId>org.apache.thrift</groupId>
             <artifactId>libthrift</artifactId>
-            <version>0.8.0</version>
+            <version>0.9.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.carrotsearch</groupId>
@@ -121,9 +127,15 @@
         </dependency>
 
         <dependency>
-            <groupId>com.xingcloud</groupId>
-            <artifactId>id_service</artifactId>
-            <version>1.0</version>
+            <groupId>com.xingcloud.xa</groupId>
+            <artifactId>id-service</artifactId>
+            <version>1.1.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
