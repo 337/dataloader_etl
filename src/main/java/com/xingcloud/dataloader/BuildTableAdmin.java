@@ -196,7 +196,7 @@ public class BuildTableAdmin {
                         MySql_16seqid.getInstance().createDBIfNotExist(project);
                         break;
                     } catch (Exception e) {
-                        LOG.error("Mysql ensureProject create  db failed. " + e.getMessage());
+                        LOG.error("Mysql ensureProject create db("+project+") failed - "+e+", messages - " + e.getMessage());
                         if (i >= tryCount - 1)
                             throw e;
                     }
