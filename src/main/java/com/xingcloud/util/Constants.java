@@ -59,6 +59,6 @@ public class Constants {
 
     public static final String KEY_MYSQLDUMP = "mysql_dump_status";
 
-
+    public static final int SLEEP_MILLIS_IF_EXCEPTION = 5000;
 
 }

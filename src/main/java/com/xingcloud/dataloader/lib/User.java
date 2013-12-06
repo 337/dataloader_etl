@@ -216,6 +216,7 @@ public class User {
           }
           break;
         case sql_string:
+          //todo: convert all property values to lowercase??? it's not the right place to convert geoip to lowercase here!!!
           String string = ((String) value).toLowerCase();
           if (string.trim().length() == 0)
             return false;
