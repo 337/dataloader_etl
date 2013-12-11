@@ -33,7 +33,7 @@ public class SeqUidCacheMapV2 {
   private static final int ONE_LINE_BYTE = 8 + 4 + 2 * 2;
   //mapper一次读取的行数
   private static final int MAP_BATCH_READ_LINE = 1024;
-  private static final int RESET_QUOTA = 300 * 10000;
+  private static final int RESET_QUOTA = 250 * 10000;
 
   //当mysql异常时，sleep时间，单位为ms
   private static final int SLEEP_MILLIS_IF_MYSQL_EXCEPTION = 5000;
