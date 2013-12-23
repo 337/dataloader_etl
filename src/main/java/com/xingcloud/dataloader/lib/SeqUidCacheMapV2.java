@@ -336,13 +336,10 @@ public class SeqUidCacheMapV2 {
 
   //如果某个项目的缓存数超过RESET_QUOTA，就重置这个项目。
   public void resetPidCache(String pid) {
-    if (map.get(pid) == null)
-      return;
-
-    final int size = map.get(pid).size();
-    if (size >= RESET_QUOTA) {
-      LOG.info("UIDCACHE: " + pid + " size exceeded reset quota.");
-      map.remove(pid);
+    LongIntOpenHashMap projectMap = map.get(pid);
+    if (projectMap != null && projectMap.size() >= RESET_QUOTA) {
+      LOG.info("UIDCACHE: " + pid + " cache size(" + projectMap.size() + ") exceeded reset quota.");
+      projectMap.clear();
     }
 //    if (size > RESET_QUOTA) {
 //      LongIntOpenHashMap shrinkMap = map.get(pid);
