@@ -33,7 +33,7 @@ public class SeqUidCacheMapV2 {
   private static final int ONE_LINE_BYTE = 8 + 4 + 2 * 2;
   //mapper一次读取的行数
   private static final int MAP_BATCH_READ_LINE = 1024;
-  private static final int RESET_QUOTA = 250 * 10000;
+  private static final int RESET_QUOTA = 150 * 10000;
 
   //当mysql异常时，sleep时间，单位为ms
   private static final int SLEEP_MILLIS_IF_MYSQL_EXCEPTION = 5000;
@@ -340,21 +340,25 @@ public class SeqUidCacheMapV2 {
       return;
 
     final int size = map.get(pid).size();
-    if (size > RESET_QUOTA) {
-      LongIntOpenHashMap shrinkMap = map.get(pid);
-      final long[] keys = shrinkMap.keys;
-      final boolean[] states = shrinkMap.allocated;
-      LongArrayList delKeys = new LongArrayList();
-      for (int i = 0, j = 0; i < states.length && j < size - RESET_QUOTA; i++) {
-        if (states[i]) {
-          delKeys.add(keys[i]);
-          j++;
-        }
-      }
-      shrinkMap.removeAll(delKeys);
-      LOG.info("------UIDCACHE " + pid + " -------- reset cache completed. " +
-        "orig size: " + size + ", now is: " + shrinkMap.size());
+    if (size >= RESET_QUOTA) {
+      LOG.info("UIDCACHE: " + pid + " size exceeded reset quota.");
+      map.remove(pid);
     }
+//    if (size > RESET_QUOTA) {
+//      LongIntOpenHashMap shrinkMap = map.get(pid);
+//      final long[] keys = shrinkMap.keys;
+//      final boolean[] states = shrinkMap.allocated;
+//      LongArrayList delKeys = new LongArrayList();
+//      for (int i = 0, j = 0; i < states.length && j < size - RESET_QUOTA; i++) {
+//        if (states[i]) {
+//          delKeys.add(keys[i]);
+//          j++;
+//        }
+//      }
+//      shrinkMap.removeAll(delKeys);
+//      LOG.info("------UIDCACHE " + pid + " -------- reset cache completed. " +
+//        "orig size: " + size + ", now is: " + shrinkMap.size());
+//    }
   }
 
 
