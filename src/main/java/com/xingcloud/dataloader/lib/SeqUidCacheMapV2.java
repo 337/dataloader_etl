@@ -37,6 +37,7 @@ public class SeqUidCacheMapV2 {
 
   //当mysql异常时，sleep时间，单位为ms
   private static final int SLEEP_MILLIS_IF_MYSQL_EXCEPTION = 5000;
+  private static final int MAX_RETRY_TIMES = 5;
 
   private static SeqUidCacheMapV2 instance;
 
@@ -228,7 +229,8 @@ public class SeqUidCacheMapV2 {
     int tryTimes = 1;
 
     long innerUid = -1;
-    while (innerUid < 0) {
+    int retryTimes = 0;
+    while (innerUid < 0 && retryTimes < MAX_RETRY_TIMES) {
       try {
         IdResult idResult = IdClient.getInstance().getOrCreateId(project, rawUid);
         innerUid = idResult.getId();
@@ -248,6 +250,7 @@ public class SeqUidCacheMapV2 {
         try {
           Thread.sleep(SLEEP_MILLIS_IF_MYSQL_EXCEPTION * tryTimes);
           tryTimes = (tryTimes << 1) & Integer.MAX_VALUE;
+          retryTimes++;
         } catch (InterruptedException ie) {
           break;
         }
