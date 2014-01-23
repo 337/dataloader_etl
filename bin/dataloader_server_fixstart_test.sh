@@ -14,7 +14,7 @@ jar="dataloader_etl_testCoin.jar";
 
 fileencoding="-Dfile.encoding=UTF-8"
 verboses="-XX:+HeapDumpOnOutOfMemoryError"
-memarg="-server -Xms12g -Xmx12g -Xss256K"
+memarg="-server -Xms10g -Xmx10g -Xss256K"
 gcarg="-XX:SurvivorRatio=16 -XX:+UseConcMarkSweepGC -XX:NewSize=512M -XX:MaxNewSize=512M -XX:+UseAdaptiveSizePolicy -XX:-ExplicitGCInvokesConcurrent -XX:+UseCMSCompactAtFullCollection -XX:CMSFullGCsBeforeCompaction=2"
 
 main="com.xingcloud.dataloader.server.DataLoaderETLWatcherCoin"
