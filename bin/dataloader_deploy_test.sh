@@ -51,7 +51,7 @@ mvn package
 
 #***************
 #copy the jar 
-hostliststr="dataloader0,dataloader1"
+hostliststr="namenode,dataloader0,dataloader1"
 host=`echo ${hostliststr}|awk '{split($1,a,",");for(key in a)print a[key];}'`
 for node in ${host} 
 do
