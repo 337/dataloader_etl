@@ -388,7 +388,7 @@ public class ProjectInfo {
       HttpRespons hr = request.sendGet("http://p.xingcloud.com/rest/projects?token=bd602691074e1aabdf818f8b539f1ef7");
       return hr.getContent();
     } catch (Exception e) {
-      LOG.error(e);
+      LOG.error(e.getMessage(), e);
     }
     return null;
   }
@@ -401,9 +401,41 @@ public class ProjectInfo {
       DBObject re = coll.findOne(new BasicDBObject("type", "project"));
       return (String) re.get("info");
     } catch (Exception e) {
-      LOG.error(e);
+//      LOG.error(e.getMessage(), e);
     }
     return null;
+  }
+
+  private static void addProjectToMongo(String project) {
+    String info = getProjectInfoFromMongodb();
+    JSONObject projectInfo = null;
+    if (info != null) {
+      projectInfo = JSONObject.fromObject(info);
+      if (projectInfo.containsKey(project)) {
+        System.out.println("Project(" + project + ") already exists in MongoDB.");
+        return;
+      }
+    }
+
+    JSONArray appIds = new JSONArray();
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("app_ids", appIds);
+    jsonObject.put("name", project);
+
+    if (projectInfo == null) {
+      projectInfo = new JSONObject();
+    }
+    projectInfo.put(project, jsonObject);
+
+    DBCollection coll = MongodbDriver.getInstanceDB().getCollection("project");
+    BasicDBObject temp = new BasicDBObject();
+    temp.put("info", projectInfo.toString());
+
+    BasicDBObject updateObject = new BasicDBObject();
+    updateObject.put("$set", temp);
+    coll.update(new BasicDBObject("type", "project"), updateObject, true, true);
+
+    System.out.println("Project(" + project + ") added to MongoDB.");
   }
 
   static ArrayList<String> getIgnoreProjectsFromMongodb() {
@@ -414,7 +446,7 @@ public class ProjectInfo {
       DBObject re = coll.findOne(new BasicDBObject("type", "ignoreProjects"));
       return (ArrayList<String>) re.get("projects");
     } catch (Exception e) {
-      LOG.error(e);
+//      LOG.error(e.getMessage(), e);
     }
     return null;
   }
@@ -426,7 +458,7 @@ public class ProjectInfo {
       DBObject setObject = new BasicDBObject().append("$set", listObject);
       coll.update(new BasicDBObject().append("type", "ignoreProjects"), setObject);
     } catch (Exception e) {
-      LOG.error(e);
+      LOG.error(e.getMessage(), e);
     }
   }
 
@@ -468,7 +500,7 @@ public class ProjectInfo {
 
       coll.update(new BasicDBObject("type", "project"), updateObject, true, true);
     } catch (Exception e) {
-      LOG.error(e);
+      LOG.error(e.getMessage(), e);
     }
   }
 
@@ -491,7 +523,7 @@ public class ProjectInfo {
 
         coll.update(new BasicDBObject("type", "project"), updateObject, true, true);
       } catch (Exception e) {
-        LOG.error(e);
+        LOG.error(e.getMessage(), e);
       }
     }
   }
@@ -508,7 +540,7 @@ public class ProjectInfo {
         LOG.info("update successful");
       }
     } catch (Exception e) {
-      LOG.error(e);
+      LOG.error(e.getMessage(), e);
     }
   }
 
@@ -598,6 +630,13 @@ public class ProjectInfo {
         ProjectInfo projectInfo = ProjectInfo.getProjectInfoFromAppidOrProject(appid);
         System.out.println(ProjectInfo.getProjectInfoFromAppidOrProject(appid));
 
+      } else if (type.equals("add")) {
+        if (args.length != 2) {
+          System.err.println("Please provide the project to add.");
+          return;
+        }
+        String project = args[1];
+        addProjectToMongo(project);
       }
     }
   }

@@ -9,7 +9,7 @@
     </mail>
 
     <mongodb>
-        <host>10.1.1.109</host>
+        <host>datanode1</host>
         <port>27021</port>
         <pool_size>150</pool_size>
         <dbname>user_info</dbname>
