@@ -38,6 +38,7 @@ public class EventMetaTable {
     private static final int MAX_EXCEED_NUM = 100;
 
     public static final Log LOG = LogFactory.getLog(EventMetaTable.class);
+    public static final Log ERROR_LOG = LogFactory.getLog("dlerror");
     public int eventTotal = 0;
     private String project;
 
@@ -134,6 +135,7 @@ public class EventMetaTable {
             return true;
         } else if (eventTotal >= StaticConfig.eventMaxTotal) {
             exceed(new EventMeta(key, 0, null), EventMeta.Status.exceedingTotal, 0);
+            ERROR_LOG.error("The event " + key +" is ignored as the total event number(" + eventTotal + ") >= max event(" +  StaticConfig.eventMaxTotal + ")");
             return false;
         } else {
             for (int i = 0; i < Event.eventFieldLength && i < key.length; i++) {
@@ -277,7 +279,7 @@ public class EventMetaTable {
 
 
     public static void main(String[] args) {
-        test();
+//        test();
     }
 
     private static void test() {
