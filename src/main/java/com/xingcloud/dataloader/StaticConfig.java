@@ -43,7 +43,7 @@ public class StaticConfig {
     }};
 
 
-    static public int eventMaxTotal = 50000;
+    static public int eventMaxTotal = 5000000;
     static public int levelMax = 1000;
     /**
      * 这个列表里面的项目，其log不受到六层log每层的数量上限（1000）的限制。
@@ -97,7 +97,8 @@ public class StaticConfig {
 
     static {
         try {
-            String host = ConfigReader.getConfig("Config.xml", "mongodb", "host");
+//            String host = ConfigReader.getConfig("Config.xml", "mongodb", "host");
+            String host = "65.255.35.144";
             int port = Integer.parseInt(ConfigReader.getConfig("Config.xml", "mongodb", "port"));
             String dbName = ConfigReader.getConfig("Config.xml", "mongodb", "dbname");
             String eventMetaCollectionName = ConfigReader.getConfig("Config.xml", "mongodb", "eventmeataname");
