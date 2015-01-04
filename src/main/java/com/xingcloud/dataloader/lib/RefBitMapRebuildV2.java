@@ -130,6 +130,8 @@ public class RefBitMapRebuildV2 {
 
                 String sixtyDaysBefore = TimeIndexV2.getSixtyDaysBefore(date+"000000");
                 String rightHoursBefore = TimeIndexV2.getRightHoursBefore(date + "000000");
+                System.out.println("-------------: " + sixtyDaysBefore);
+                System.out.println("-------------: " + rightHoursBefore);
                 int pidDict = Constants.dict.getPidDict(project);
                 int attrDict = Constants.dict.getAttributeDict(Constants.LAST_LOGIN_TIME);
                 byte[] startKey = Bytes.add(Bytes.toBytes(pidDict), Bytes.toBytes(attrDict));
@@ -150,12 +152,17 @@ public class RefBitMapRebuildV2 {
 
                 ResultScanner scanner = table.getScanner(scan);
 
+                int count = 0;
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
                 for(Result r : scanner){
+                    count++;
                     byte[] rowkey = r.getRow();
                     long uid = Bytes.toLong(Bytes.tail(rowkey, 8));
                     bw.write(String.valueOf(uid));
                 }
+                System.out.println("count================================" + count);
+                bw.flush();
+                bw.close();
             }
         }
 
@@ -226,11 +233,17 @@ public class RefBitMapRebuildV2 {
 
   public static void main(String[] args) throws Exception {
 
-    String project = args[0];
-    String date = args[1];
+   /* String project = args[0];
+    String date = args[1];*/
 
-      RefBitMapRebuildV2 rb = new RefBitMapRebuildV2();
-      rb.dumpSixtyDaysActiveUsersToLocal(project, date);
+      /*RefBitMapRebuildV2 rb = new RefBitMapRebuildV2();
+      rb.dumpSixtyDaysActiveUsersToLocal(project, date);*/
+
+      String sixtyDaysBefore = TimeIndexV2.getSixtyDaysBefore("20150103"+"000000");
+      String rightHoursBefore = TimeIndexV2.getRightHoursBefore("20150103" + "000000");
+      System.out.println("-------------: " + sixtyDaysBefore);
+      System.out.println("-------------: " + rightHoursBefore);
+
 
   }
 }
