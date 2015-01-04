@@ -233,11 +233,11 @@ public class RefBitMapRebuildV2 {
 
   public static void main(String[] args) throws Exception {
 
-   /* String project = args[0];
-    String date = args[1];*/
+    String project = args[0];
+    String date = args[1];
 
-      /*RefBitMapRebuildV2 rb = new RefBitMapRebuildV2();
-      rb.dumpSixtyDaysActiveUsersToLocal(project, date);*/
+      RefBitMapRebuildV2 rb = new RefBitMapRebuildV2();
+      rb.dumpSixtyDaysActiveUsersToLocal(project, date);
 
       String sixtyDaysBefore = TimeIndexV2.getSixtyDaysBefore("20150103"+"000000");
       String rightHoursBefore = TimeIndexV2.getRightHoursBefore("20150103" + "000000");
