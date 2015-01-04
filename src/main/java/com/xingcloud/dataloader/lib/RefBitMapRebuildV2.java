@@ -229,8 +229,8 @@ public class RefBitMapRebuildV2 {
 
   public static void main(String[] args) throws Exception {
 
-    String project = "webssearches";
-    String date ="20150103";
+    String project = args[0];
+    String date = args[1];
 
       RefBitMapRebuildV2 rb = new RefBitMapRebuildV2();
       rb.dumpSixtyDaysActiveUsersToLocal(project, date);
