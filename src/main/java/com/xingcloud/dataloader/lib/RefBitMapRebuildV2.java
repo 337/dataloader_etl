@@ -117,9 +117,6 @@ public class RefBitMapRebuildV2 {
         long currentTime = System.currentTimeMillis();
         String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS2 + File.separator + project;
         File file = new File(filePath);
-        /*if(!file.exists()) {
-
-        }*/
 
 //        Configuration conf = HBaseConfiguration.create();
         HBaseKeychain keychain = HBaseKeychain.getInstance();
@@ -145,8 +142,8 @@ public class RefBitMapRebuildV2 {
                 scan.setCaching(10000);
 
                 FilterList list = new FilterList(FilterList.Operator.MUST_PASS_ALL);
-                Filter filter1 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(sixtyDaysBefore)));
-                Filter filter2 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(rightHoursBefore)));
+                Filter filter1 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(Long.parseLong(sixtyDaysBefore))));
+                Filter filter2 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(Long.parseLong(rightHoursBefore))));
                 list.addFilter(filter1);
                 list.addFilter(filter2);
                 scan.setFilter(list);
