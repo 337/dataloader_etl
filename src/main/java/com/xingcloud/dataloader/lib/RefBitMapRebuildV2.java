@@ -1,5 +1,7 @@
 package com.xingcloud.dataloader.lib;
 
+import com.xingcloud.dataloader.hbase.hash.HBaseHash;
+import com.xingcloud.dataloader.hbase.hash.HBaseKeychain;
 import com.xingcloud.dataloader.hbase.table.user.UserPropertyBitmaps;
 import com.xingcloud.hbase.HBaseOperation;
 import com.xingcloud.redis.RedisShardedPoolResourceManager;
@@ -115,35 +117,45 @@ public class RefBitMapRebuildV2 {
         long currentTime = System.currentTimeMillis();
         String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS2 + File.separator + project;
 
-        String sixtyDaysBefore = TimeIndexV2.getSixtyDaysBefore(date+"000000");
-        String rightHoursBefore = TimeIndexV2.getRightHoursBefore(date + "000000");
-        int pidDict = Constants.dict.getPidDict(project);
-        int attrDict = Constants.dict.getAttributeDict(Constants.LAST_LOGIN_TIME);
-        byte[] startKey = Bytes.add(Bytes.toBytes(pidDict), Bytes.toBytes(attrDict));
-        byte[] endKey = Bytes.add(Bytes.toBytes(pidDict), Bytes.toBytes(attrDict + 1));
+//        Configuration conf = HBaseConfiguration.create();
+        HBaseKeychain keychain = HBaseKeychain.getInstance();
+        List<HBaseHash> hashes = keychain.getConfigs();
+        for (int i = 0; i < hashes.size(); i++) {
+            HBaseHash hash = hashes.get(i);
+            Map<String, Configuration> configs = hash.configs();
+            for (Map.Entry<String, Configuration> entry : configs.entrySet()) {
+                Configuration value = entry.getValue();
+                HTable table = new HTable(value, Constants.ATTRIBUTE_TABLE);
 
-        Scan scan = new Scan();
-        scan.setStartRow(startKey);
-        scan.setStopRow(endKey);
-        scan.addColumn(Bytes.toBytes(Constants.userColumnFamily), Bytes.toBytes(Constants.userColumnQualifier));
-        scan.setCaching(10000);
+                String sixtyDaysBefore = TimeIndexV2.getSixtyDaysBefore(date+"000000");
+                String rightHoursBefore = TimeIndexV2.getRightHoursBefore(date + "000000");
+                int pidDict = Constants.dict.getPidDict(project);
+                int attrDict = Constants.dict.getAttributeDict(Constants.LAST_LOGIN_TIME);
+                byte[] startKey = Bytes.add(Bytes.toBytes(pidDict), Bytes.toBytes(attrDict));
+                byte[] endKey = Bytes.add(Bytes.toBytes(pidDict), Bytes.toBytes(attrDict + 1));
 
-        FilterList list = new FilterList(FilterList.Operator.MUST_PASS_ALL);
-        Filter filter1 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(sixtyDaysBefore)));
-        Filter filter2 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(rightHoursBefore)));
-        list.addFilter(filter1);
-        list.addFilter(filter2);
-        scan.setFilter(list);
+                Scan scan = new Scan();
+                scan.setStartRow(startKey);
+                scan.setStopRow(endKey);
+                scan.addColumn(Bytes.toBytes(Constants.userColumnFamily), Bytes.toBytes(Constants.userColumnQualifier));
+                scan.setCaching(10000);
 
-        Configuration conf = HBaseConfiguration.create();
-        HTable table = new HTable(conf, Constants.ATTRIBUTE_TABLE);
-        ResultScanner scanner = table.getScanner(scan);
+                FilterList list = new FilterList(FilterList.Operator.MUST_PASS_ALL);
+                Filter filter1 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(sixtyDaysBefore)));
+                Filter filter2 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(rightHoursBefore)));
+                list.addFilter(filter1);
+                list.addFilter(filter2);
+                scan.setFilter(list);
 
-        BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true));
-        for(Result r : scanner){
-            byte[] rowkey = r.getRow();
-            long uid = Bytes.toLong(Bytes.tail(rowkey, 8));
-            bw.write(String.valueOf(uid));
+                ResultScanner scanner = table.getScanner(scan);
+
+                BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true));
+                for(Result r : scanner){
+                    byte[] rowkey = r.getRow();
+                    long uid = Bytes.toLong(Bytes.tail(rowkey, 8));
+                    bw.write(String.valueOf(uid));
+                }
+            }
         }
 
         LOG.info(project + " dump  60 active from mysql  using " + (System.currentTimeMillis() - currentTime) + " ms.");
