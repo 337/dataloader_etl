@@ -158,7 +158,7 @@ public class RefBitMapRebuildV2 {
                     count++;
                     byte[] rowkey = r.getRow();
                     long uid = Bytes.toLong(Bytes.tail(rowkey, 8));
-                    bw.write(String.valueOf(uid));
+                    bw.write(String.valueOf(uid) + "\t" + Bytes.toString(r.getValue(columnfamily, qualifier)) + "\n");
                 }
                 System.out.println("count================================" + count);
                 bw.flush();
@@ -238,11 +238,6 @@ public class RefBitMapRebuildV2 {
 
       RefBitMapRebuildV2 rb = new RefBitMapRebuildV2();
       rb.dumpSixtyDaysActiveUsersToLocal(project, date);
-
-      String sixtyDaysBefore = TimeIndexV2.getSixtyDaysBefore("20150103"+"000000");
-      String rightHoursBefore = TimeIndexV2.getRightHoursBefore("20150103" + "000000");
-      System.out.println("-------------: " + sixtyDaysBefore);
-      System.out.println("-------------: " + rightHoursBefore);
 
 
   }
