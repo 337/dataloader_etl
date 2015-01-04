@@ -143,7 +143,7 @@ public class RefBitMapRebuildV2 {
 
                 FilterList list = new FilterList(FilterList.Operator.MUST_PASS_ALL);
                 Filter filter1 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(Long.parseLong(sixtyDaysBefore))));
-                Filter filter2 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(Long.parseLong(rightHoursBefore))));
+                Filter filter2 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.LESS, new BinaryComparator(Bytes.toBytes(Long.parseLong(rightHoursBefore))));
                 list.addFilter(filter1);
                 list.addFilter(filter2);
                 scan.setFilter(list);
