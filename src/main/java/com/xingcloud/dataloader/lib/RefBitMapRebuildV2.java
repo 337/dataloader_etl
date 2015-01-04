@@ -116,6 +116,10 @@ public class RefBitMapRebuildV2 {
         // load 60 active users from hbase to localfile.
         long currentTime = System.currentTimeMillis();
         String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS2 + File.separator + project;
+        File file = new File(filePath);
+        /*if(!file.exists()) {
+
+        }*/
 
 //        Configuration conf = HBaseConfiguration.create();
         HBaseKeychain keychain = HBaseKeychain.getInstance();
@@ -149,7 +153,7 @@ public class RefBitMapRebuildV2 {
 
                 ResultScanner scanner = table.getScanner(scan);
 
-                BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true));
+                BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
                 for(Result r : scanner){
                     byte[] rowkey = r.getRow();
                     long uid = Bytes.toLong(Bytes.tail(rowkey, 8));
