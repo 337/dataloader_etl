@@ -158,7 +158,7 @@ public class RefBitMapRebuildV2 {
                     count++;
                     byte[] rowkey = r.getRow();
                     long uid = Bytes.toLong(Bytes.tail(rowkey, 8));
-                    bw.write(String.valueOf(uid) + "\t" + Bytes.toString(r.getValue(columnfamily, qualifier)) + "\n");
+                    bw.write(String.valueOf(uid) + "\t" + Bytes.toLong(r.getValue(columnfamily, qualifier)) + "\n");
                 }
                 System.out.println("count================================" + count);
                 bw.flush();
