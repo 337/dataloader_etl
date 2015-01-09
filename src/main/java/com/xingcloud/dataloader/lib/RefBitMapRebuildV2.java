@@ -55,7 +55,7 @@ public class RefBitMapRebuildV2 {
     return instance;
   }
 
-  public void rebuildSixtyDays(String project, String date, int index) throws Exception {
+  public void rebuildSixtyDays(String project, String date, int index) {
     if (ignoreProjects.contains(project)) return;
     if (index == Constants.FIRST_TASK_NUM) {
       rebuildSixtyDaysActiveUsersFromMySQL(project, date);
@@ -66,7 +66,7 @@ public class RefBitMapRebuildV2 {
     }
   }
 
-  private void rebuildSixtyDaysActiveUsersFromMySQL(String project, String date) throws Exception {
+  private void rebuildSixtyDaysActiveUsersFromMySQL(String project, String date) {
     dumpSixtyDaysActiveUsersToLocal(project, date);
     rebuildSixtyDaysActiveUsersFromLocalFile(project, new String[]{User.refField});
   }
@@ -112,13 +112,12 @@ public class RefBitMapRebuildV2 {
             "ms.");
   }
 
-    private synchronized void dumpSixtyDaysActiveUsersToLocal(String project, String date) throws Exception {
+    private synchronized void dumpSixtyDaysActiveUsersToLocal(String project, String date) {
         // load 60 active users from hbase to localfile.
         long currentTime = System.currentTimeMillis();
         String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS2 + File.separator + project;
         File file = new File(filePath);
 
-//        Configuration conf = HBaseConfiguration.create();
         HBaseKeychain keychain = HBaseKeychain.getInstance();
         List<HBaseHash> hashes = keychain.getConfigs();
         for (int i = 0; i < hashes.size(); i++) {
@@ -126,43 +125,49 @@ public class RefBitMapRebuildV2 {
             Map<String, Configuration> configs = hash.configs();
             for (Map.Entry<String, Configuration> entry : configs.entrySet()) {
                 Configuration value = entry.getValue();
-                HTable table = new HTable(value, Constants.ATTRIBUTE_TABLE);
+                try {
+                    HTable table = new HTable(value, Constants.ATTRIBUTE_TABLE);
 
-                String sixtyDaysBefore = TimeIndexV2.getSixtyDaysBefore(date+"000000");
-                String rightHoursBefore = TimeIndexV2.getRightHoursBefore(date + "000000");
-                System.out.println("-------------: " + sixtyDaysBefore);
-                System.out.println("-------------: " + rightHoursBefore);
-                int pidDict = Constants.dict.getPidDict(project);
-                int attrDict = Constants.dict.getAttributeDict(Constants.LAST_LOGIN_TIME);
-                byte[] startKey = Bytes.add(Bytes.toBytes(pidDict), Bytes.toBytes(attrDict));
-                byte[] endKey = Bytes.add(Bytes.toBytes(pidDict), Bytes.toBytes(attrDict + 1));
+                    String sixtyDaysBefore = TimeIndexV2.getSixtyDaysBefore(date+"000000");
+                    String rightHoursBefore = TimeIndexV2.getRightHoursBefore(date + "000000");
+//                    System.out.println("-------------: " + sixtyDaysBefore);
+//                    System.out.println("-------------: " + rightHoursBefore);
+                    int pidDict = Constants.dict.getPidDict(project);
+                    int attrDict = Constants.dict.getAttributeDict(Constants.LAST_LOGIN_TIME);
+                    byte[] startKey = Bytes.add(Bytes.toBytes(pidDict), Bytes.toBytes(attrDict));
+                    byte[] endKey = Bytes.add(Bytes.toBytes(pidDict), Bytes.toBytes(attrDict + 1));
 
-                Scan scan = new Scan();
-                scan.setStartRow(startKey);
-                scan.setStopRow(endKey);
-                scan.addColumn(Bytes.toBytes(Constants.userColumnFamily), Bytes.toBytes(Constants.userColumnQualifier));
-                scan.setCaching(10000);
+                    Scan scan = new Scan();
+                    scan.setStartRow(startKey);
+                    scan.setStopRow(endKey);
+                    scan.addColumn(Bytes.toBytes(Constants.userColumnFamily), Bytes.toBytes(Constants.userColumnQualifier));
+                    scan.setCaching(10000);
 
-                FilterList list = new FilterList(FilterList.Operator.MUST_PASS_ALL);
-                Filter filter1 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(Long.parseLong(sixtyDaysBefore))));
-                Filter filter2 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.LESS, new BinaryComparator(Bytes.toBytes(Long.parseLong(rightHoursBefore))));
-                list.addFilter(filter1);
-                list.addFilter(filter2);
-                scan.setFilter(list);
+                    FilterList list = new FilterList(FilterList.Operator.MUST_PASS_ALL);
+                    Filter filter1 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.GREATER_OR_EQUAL, new BinaryComparator(Bytes.toBytes(Long.parseLong(sixtyDaysBefore))));
+                    Filter filter2 = new SingleColumnValueFilter(columnfamily, qualifier, CompareFilter.CompareOp.LESS, new BinaryComparator(Bytes.toBytes(Long.parseLong(rightHoursBefore))));
+                    list.addFilter(filter1);
+                    list.addFilter(filter2);
+                    scan.setFilter(list);
 
-                ResultScanner scanner = table.getScanner(scan);
+                    ResultScanner scanner = table.getScanner(scan);
 
-                int count = 0;
-                BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
-                for(Result r : scanner){
-                    count++;
-                    byte[] rowkey = r.getRow();
-                    long uid = Bytes.toLong(Bytes.tail(rowkey, 8));
-                    bw.write(String.valueOf(uid) + "\t" + Bytes.toLong(r.getValue(columnfamily, qualifier)) + "\n");
+                    int count = 0;
+                    BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+                    for(Result r : scanner){
+                        count++;
+                        byte[] rowkey = r.getRow();
+                        long uid = Bytes.toLong(Bytes.tail(rowkey, 8));
+                        bw.write(String.valueOf(uid) + "\n");       // + "\t" + Bytes.toLong(r.getValue(columnfamily, qualifier))
+                    }
+                    System.out.println("count================================" + count);
+                    bw.flush();
+                    bw.close();
+                } catch (ParseException e) {
+                    throw new RuntimeException("ERROR !!!! get 60 days active user for " + project + " failed.");
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
                 }
-                System.out.println("count================================" + count);
-                bw.flush();
-                bw.close();
             }
         }
 
@@ -233,11 +238,11 @@ public class RefBitMapRebuildV2 {
 
   public static void main(String[] args) throws Exception {
 
-    String project = args[0];
-    String date = args[1];
+        String project = args[0];
+        String date = args[1];
 
-      RefBitMapRebuildV2 rb = new RefBitMapRebuildV2();
-      rb.dumpSixtyDaysActiveUsersToLocal(project, date);
+        RefBitMapRebuildV2 rb = new RefBitMapRebuildV2();
+        rb.dumpSixtyDaysActiveUsersToLocal(project, date);
 
 
   }
