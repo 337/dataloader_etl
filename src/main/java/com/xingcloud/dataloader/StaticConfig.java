@@ -73,8 +73,8 @@ public class StaticConfig {
 
     static public boolean compress = true;
 
-    static public int readerPoolThreadNumber = 10;
-    static public int submitPoolThreadNumber = 10;
+    static public int readerPoolThreadNumber = 20;
+    static public int submitPoolThreadNumber = 20;
 
     static {
         try {
