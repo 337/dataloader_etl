@@ -317,6 +317,8 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       }
     }
     LOG.info("local file has appid:" + appidSet.size());
+      appidSet.remove("newtab3-bg");
+      appidSet.remove("newtab1-bg");
     return appidSet;
   }
 
