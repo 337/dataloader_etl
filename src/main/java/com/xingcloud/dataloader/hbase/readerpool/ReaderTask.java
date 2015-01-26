@@ -3,6 +3,7 @@ package com.xingcloud.dataloader.hbase.readerpool;
 import com.xingcloud.dataloader.hbase.table.user.UserPropertyBitmaps;
 import com.xingcloud.dataloader.hbase.tableput.CombineTablePut;
 import com.xingcloud.dataloader.hbase.tableput.TablePut;
+import com.xingcloud.dataloader.hbase.tableput.TablePutPool;
 import com.xingcloud.dataloader.hbase.tableput.UserTablePut;
 import com.xingcloud.dataloader.lib.*;
 import com.xingcloud.util.Constants;
@@ -32,6 +33,7 @@ public class ReaderTask implements Runnable {
 
   private String date;
   private int index;
+    private TablePutPool tablePutPool;
 
   private long timeTotal;
 
@@ -47,16 +49,16 @@ public class ReaderTask implements Runnable {
    *
    * @param project   要读取的项目
    * @param appidList 要读取的项目对于的服列表
-   * @param tablePut  上报数据的存储对象
+   * @param tablePutPool  上报数据的存储对象
    * @param date      处理的日期
    * @param index     处理的5分钟时间段
    */
 
 
-  public ReaderTask(String project, List<String> appidList, TablePut tablePut, String date, int index, List<String> v4Logs) {
+  public ReaderTask(String project, List<String> appidList, TablePutPool tablePutPool, String date, int index, List<String> v4Logs) {
     this.project = project;
     this.appidList = appidList;
-    this.tablePut = tablePut;
+    this.tablePutPool = tablePutPool;
 
     this.date = date;
     this.index = index;
@@ -68,6 +70,7 @@ public class ReaderTask implements Runnable {
     try {
 
       long t1 = System.currentTimeMillis();
+        this.tablePut = tablePutPool.getTablePut(project, date, index);
       List<Long> timeList = new ArrayList<Long>();
       //每天第一个任务，从mysql dump 最近60天的访问用户，这部分用户的ref属性（ref，ref0-ref4）不再重复更新
       //如果某个用户前一天新注册但是没有在那一天内更新ref*属性，那他的ref*属性就一直不能更新
