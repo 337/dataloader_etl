@@ -71,6 +71,7 @@ public class ReaderTask implements Runnable {
 
       long t1 = System.currentTimeMillis();
         this.tablePut = tablePutPool.getTablePut(project, date, index);
+      long it =  System.currentTimeMillis();
       List<Long> timeList = new ArrayList<Long>();
       //每天第一个任务，从mysql dump 最近60天的访问用户，这部分用户的ref属性（ref，ref0-ref4）不再重复更新
       //如果某个用户前一天新注册但是没有在那一天内更新ref*属性，那他的ref*属性就一直不能更新
@@ -129,7 +130,7 @@ public class ReaderTask implements Runnable {
       if ((index + 2) % flushInternal == 0)
         SeqUidCacheMapV2.getInstance().resetPidCache(project);
 
-      LOG.info("finish reading and flushing events the project :" + project + " using " + this.timeTotal + " ms," +
+      LOG.info("finish reading and flushing events the project :" + project + " using " + this.timeTotal + " ms,init using " + (it -t1) +" ms," +
               "getid using " + SeqUidCacheMapV2.getInstance().oneReadTaskGetUidNanoTime(project) / 1000000 + " ms," +
               "flusing event and user using " + (System.currentTimeMillis() - t3) + "ms. with list:" + sb.toString());
     } catch (Exception e) {
