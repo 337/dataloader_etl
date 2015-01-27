@@ -216,6 +216,9 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
     //临时忽略对项目gbanner的处理
     LOG.info("temporarily ignore project: gbanner");
     projectSet.remove("gbanner");
+    projectSet.remove("newtabv1-bg");
+    projectSet.remove("newtabv3-bg");
+    projectSet.remove("sof-windowspm");
 
       for(String pid : StaticConfig.invalidpids){
           projectSet.remove(pid);
