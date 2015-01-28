@@ -70,6 +70,7 @@ public class EventMetaTable {
             long start = System.currentTimeMillis();
             eventTotal = 0;
             DBCursor cursor = MongodbDriver.queryAllEvent(project);
+            long qend = System.currentTimeMillis();
             while (cursor.hasNext()) {
                 DBObject dbObject = cursor.next();
                 if (dbObject.get(STATUS) != null && EventMeta.Status.values()[(Integer) dbObject.get(STATUS)] == EventMeta.Status.deleted) {
@@ -110,7 +111,7 @@ public class EventMetaTable {
             long end = System.currentTimeMillis();
             MongodbDriver.queryAllEventTimes += (end - start);
             MongodbDriver.queryAllEventTotal++;
-            LOG.info(project + "init mongo event using " + (end - start) + " ms.");
+            LOG.info(project + "init mongo event using " + (end - start) + " ms, query event using " + (qend - start) + " ms.");
         } catch (Exception e) {
             LOG.error("mongo exception," + project, e);
 
