@@ -21,7 +21,7 @@ main="com.xingcloud.dataloader.server.DataLoaderETLWatcherCoin"
 
 java -classpath ${runJar}/${jar} com.xingcloud.dataloader.tools.ClearTaskQueue 192.168.1.142 192.168.1.143 192.168.1.144 192.168.1.145
 
-hostliststr="192.168.1.142,192.168.1.143,192.168.1.144,192.168.1.145"
+hostliststr="192.168.1.142,192.168.1.143,192.168.1.144,192.168.1.145,192.168.1.55"
 #hostliststr="127.0.0.1,localhost"
 host=`echo ${hostliststr}|awk '{split($1,a,",");for(key in a)print a[key];}'`
 for node in ${host} 
