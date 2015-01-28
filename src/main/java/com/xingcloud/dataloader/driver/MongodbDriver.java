@@ -71,7 +71,7 @@ public class MongodbDriver {
     public static DBCursor queryAllEvent(String project) {
         DBObject queryObject = new BasicDBObject();
         queryObject.put(EventMetaTable.mongodbProjectIdField, project);
-        return getEventMetaCollection().find(queryObject);
+        return getEventMetaCollection().find(queryObject).batchSize(500);
     }
 
     private static AtomicLong pushEventTotal = new AtomicLong();
