@@ -70,9 +70,14 @@ public class EventMetaTable {
             long start = System.currentTimeMillis();
             eventTotal = 0;
             DBCursor cursor = MongodbDriver.queryAllEvent(project);
-            long qend = System.currentTimeMillis();
+            List<DBObject> dbObjects = new ArrayList<DBObject>();
             while (cursor.hasNext()) {
-                DBObject dbObject = cursor.next();
+                dbObjects.add(cursor.next());
+            }
+            long qend = System.currentTimeMillis();
+
+            for(DBObject dbObject : dbObjects){
+//                DBObject dbObject = cursor.next();
                 if (dbObject.get(STATUS) != null && EventMeta.Status.values()[(Integer) dbObject.get(STATUS)] == EventMeta.Status.deleted) {
                     continue;
                 }
