@@ -120,7 +120,7 @@ public class DataLoaderMessageMaker {
     //assign all the task to all node
     public void fixTask(String date, int si, int ei, String projectList, String runType, String ip) {
         for (int i = si; i <= ei; i++) {
-            addMessageToNode(new TaskMessage(date, i, projectList, runType, "Low"), ip);
+            addMessageToNode(new TaskMessage(date, i, projectList, runType, "High"), ip);
         }
     }
 
