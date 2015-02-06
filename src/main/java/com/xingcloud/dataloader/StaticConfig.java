@@ -227,7 +227,7 @@ public class StaticConfig {
         "sof-iminent","fishao-de","candymahjong","letsfarm-dev","kkpoke21","yahoo","v9-ttinew","search-savetome","tw1","sof-yandex","dragonkokaoadreally",
         "arcadecenter","battlealertatapple","letsfarm","northeuropekr","v9-ssvyk","longzhizhaohuankoad","soft-twitter-assist","sof-jwallet","v9-mhc",
         "uf-pay","sof-ftchrome1","yes-test","solitaireduels","sof-lksav","raydownload","v9-vtnet","sof-iapps","gtxsg","hdtexaspoker","happ_1ch","nztx",
-        "kd","sof-addlyrics","farm3_meinvz","iobit","fiwhman","sof-pcsuzk","s","v9-mtix","v9-rdm","yac-gdpdl","sof-ntspop","pt","sof-lol","iappyfarmer",
+        "kd","sof-addlyrics","farm3_meinvz","iobit","fiwhman","sof-pcsuzk","s","v9-mtix","v9-rdm","yac-gdpdl","pt","sof-lol","iappyfarmer",
         "boyojoy","tcg","tibia","default-newtab","mhsj","kongregatetest","xing","mahjongduels","sof-pcf","hk","krlong","yac-updl","pgzs","zhongqinglv",
         "atest","ns","drakensang","menghuan","sof","sof-bp","xlfc-cbnc","monster","kongfu","xlfcmobile","longzhizhaohuan","minigarden","sz-eng","v9-tug",
         "govome ","globososo","sof-newhpnt","lp","v9m","gbanner","ddt-ff"};
