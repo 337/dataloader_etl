@@ -25,7 +25,7 @@ import java.util.Map;
  * Time: 10:53 AM
  * To change this template use File | Settings | File Templates.
  */
-public class CoinProcessTask implements Runnable{
+public class CoinProcessTask /*implements Runnable*/{
     public static final Log LOG = LogFactory.getLog(ReaderTask.class);
     private static long tasknum=0;
     private long mytasknum=0;

@@ -82,9 +82,9 @@ public class ReaderTask implements Runnable {
 
       SeqUidCacheMapV2.getInstance().initCache(project);
 
-      int processCoinThreadNum = 1;
-      ExecutorService audit_exec = Executors.newFixedThreadPool(processCoinThreadNum);
-
+//      int processCoinThreadNum = 1;
+//      ExecutorService audit_exec = Executors.newFixedThreadPool(processCoinThreadNum);
+        ExecutorService audit_exec = null;
 
       //轮询所有服id分析sitedata日志和store_log日志
       for (String appid : appidList) {
@@ -217,7 +217,8 @@ public class ReaderTask implements Runnable {
             successfulEventNumber++;
             if (coinEventList.size() >= batchCoinEventNum) {
               List<Event> submitEvents = coinEventList;
-              exec.submit(new CoinProcessTask(project, submitEvents, tablePut));
+//              exec.submit(new CoinProcessTask(project, submitEvents, tablePut));
+              new CoinProcessTask(project, submitEvents, tablePut).run();
               coinEventList = new ArrayList<Event>();
             }
           } else if (tablePut.put(event)) successfulEventNumber++;
@@ -230,7 +231,8 @@ public class ReaderTask implements Runnable {
       try {
         if (bufferedReader != null) bufferedReader.close();
         if (coinEventList.size() > 0) {
-          exec.submit(new CoinProcessTask(project, coinEventList, tablePut));
+//          exec.submit(new CoinProcessTask(project, coinEventList, tablePut));
+          new CoinProcessTask(project, coinEventList, tablePut).run();
         }
       } catch (Exception e) {
         LOG.error("close bufferreader catch Exception " + appid + " " + date + " " + index, e);
@@ -253,7 +255,8 @@ public class ReaderTask implements Runnable {
           if (coinEventList.size() >= batchCoinEventNum) {
             List<Event> submitEvents = coinEventList;
 
-            exec.submit(new CoinProcessTask(project, submitEvents, tablePut));
+//            exec.submit(new CoinProcessTask(project, submitEvents, tablePut));
+            new CoinProcessTask(project, submitEvents, tablePut).run();
             coinEventList = new ArrayList<Event>();
           }
         } else
@@ -261,7 +264,8 @@ public class ReaderTask implements Runnable {
       }
     }
     if (coinEventList.size() > 0) {
-      exec.submit(new CoinProcessTask(project, coinEventList, tablePut));
+//      exec.submit(new CoinProcessTask(project, coinEventList, tablePut));
+      new CoinProcessTask(project, coinEventList, tablePut).run();
     }
   }
 
