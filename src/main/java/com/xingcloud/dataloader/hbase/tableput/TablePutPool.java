@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 保存所有项目的tableput，并根据类型，实例化对应tableput对象
@@ -16,7 +17,7 @@ import java.util.Map;
 public class TablePutPool {
     public static final Log LOG = LogFactory.getLog(TablePutPool.class);
 
-    private Map<String, TablePut> tablePutMap = new HashMap<String, TablePut>();
+    private Map<String, TablePut> tablePutMap = new ConcurrentHashMap<String, TablePut>();
     private RunType runType;
 
     public TablePutPool(RunType runType) {
