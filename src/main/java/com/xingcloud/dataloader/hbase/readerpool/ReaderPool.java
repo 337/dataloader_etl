@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ReaderPool {
     public static final Log LOG = LogFactory.getLog(ReaderPool.class);
-    public static final int ThreadPoolMaxTime=3*3600;
+    public static final int ThreadPoolMaxTime=2*3600;
 
     private static final SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
