@@ -180,7 +180,7 @@ public class StaticConfig {
 //    public static void main(String[] args){
 //        System.out.println(StaticConfig.hdfsRoot);
 //    }
-    static public String[] invalidpids = new String[]{"newtab3-bg","newtab1-bg","extended-protection","focalpricetest1","sof-hpprotect",
+    static public String[] invalidpids = new String[]{"newtabv3-bg","newtabv1-bg","extended-protection","focalpricetest1","sof-hpprotect",
         "v9-sof","v9-mdd-zs","sof-gl","qone8search","sof-hpnt","citylife","fishman","v9-fft-2","v9-fft",
         "picatowntest","zoom","qone8-search","lollygame","sa2-single","sof-app-wallpaper","sof-pc","v9-fft-1",
         "v9-bnd","v9-ins","defender","goe","v9-gzg","v9-iob","v9-gdp","snsnations","v9-vei","v9-slb","wushen-ko",
@@ -230,7 +230,7 @@ public class StaticConfig {
         "kd","sof-addlyrics","farm3_meinvz","iobit","fiwhman","sof-pcsuzk","s","v9-mtix","v9-rdm","yac-gdpdl","pt","sof-lol","iappyfarmer",
         "boyojoy","tcg","tibia","default-newtab","mhsj","kongregatetest","xing","mahjongduels","sof-pcf","hk","krlong","yac-updl","pgzs","zhongqinglv",
         "atest","ns","drakensang","menghuan","sof","sof-bp","xlfc-cbnc","monster","kongfu","xlfcmobile","longzhizhaohuan","minigarden","sz-eng","v9-tug",
-        "govome ","globososo","sof-newhpnt","lp","v9m","gbanner","ddt-ff"};
+        "govome","globososo","sof-newhpnt","lp","v9m","gbanner","ddt-ff"};
 
 
 }
