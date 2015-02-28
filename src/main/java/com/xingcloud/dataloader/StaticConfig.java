@@ -180,7 +180,7 @@ public class StaticConfig {
 //    public static void main(String[] args){
 //        System.out.println(StaticConfig.hdfsRoot);
 //    }
-    static public String[] invalidpids = new String[]{"newtab3-bg","newtab1-bg","extended-protection","focalpricetest1","sof-hpprotect",
+    static public String[] invalidpids = new String[]{"newtabv3-bg","newtabv1-bg","extended-protection","focalpricetest1","sof-hpprotect",
         "v9-sof","v9-mdd-zs","sof-gl","qone8search","sof-hpnt","citylife","fishman","v9-fft-2","v9-fft",
         "picatowntest","zoom","qone8-search","lollygame","sa2-single","sof-app-wallpaper","sof-pc","v9-fft-1",
         "v9-bnd","v9-ins","defender","goe","v9-gzg","v9-iob","v9-gdp","snsnations","v9-vei","v9-slb","wushen-ko",
