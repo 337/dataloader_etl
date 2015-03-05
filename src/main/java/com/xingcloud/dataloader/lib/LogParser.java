@@ -12,6 +12,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 解析日志，转化为event列表
@@ -279,9 +281,15 @@ public class LogParser {
       String refValue = (String) updateMap.get("ref");
       Map<String, String> refAnalyseValue = analyseRef(refValue.trim());
       updateMap.remove("ref");
-      for (Map.Entry<String, String> entry : refAnalyseValue.entrySet())
+
+      for (Map.Entry<String, String> entry : refAnalyseValue.entrySet()) {
+        if (this.hasSpecialChar(entry.getValue())) {
+            continue;
+        }
         updateMap.put(entry.getKey(), entry.getValue());
+      }
     }
+
     //local的属性，传入的是ip的大小，转为相应的国家
     if (updateMap.containsKey(geoip)) {
       try {
@@ -295,8 +303,36 @@ public class LogParser {
         updateMap.put(geoip, updateMap.get(geoip).toString());
       }
     }
+
+    for(int i = 0; i < 5; i++) {
+        String refKey = "ref" + i;
+        if (updateMap.containsKey(refKey)) {
+            String refValue = (String) updateMap.get(refKey);
+            Map<String, String> refAnalyseValue = analyseRef(refValue.trim());
+            updateMap.remove(refKey);
+
+            for (Map.Entry<String, String> entry : refAnalyseValue.entrySet()) {
+                if (this.hasSpecialChar(entry.getValue())) {
+                    continue;
+                }
+                updateMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
     return objectMapper.writeValueAsString(updateMap);
   }
+
+    //是否含有特殊字符
+    public boolean hasSpecialChar(String str) {
+        String regEx = "[`~!@#$%^&*()+=|{}':;',\\\\\\\\]";
+        Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(str);
+        if(m.find())
+            return true;
+        else
+            return false;
+    }
 
   //visit事件，也更新ref的状态
   private Event getRefUpdateEvent(String uid, String refContent, long value, long ts) throws IOException {
