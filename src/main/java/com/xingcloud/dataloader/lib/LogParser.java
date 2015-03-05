@@ -283,9 +283,9 @@ public class LogParser {
       updateMap.remove("ref");
 
       for (Map.Entry<String, String> entry : refAnalyseValue.entrySet()) {
-        if (this.hasSpecialChar(entry.getValue())) {
-            continue;
-        }
+//        if (this.hasSpecialChar(entry.getValue())) {
+//            continue;
+//        }
         updateMap.put(entry.getKey(), entry.getValue());
       }
     }
@@ -308,14 +308,8 @@ public class LogParser {
         String refKey = "ref" + i;
         if (updateMap.containsKey(refKey)) {
             String refValue = (String) updateMap.get(refKey);
-            Map<String, String> refAnalyseValue = analyseRef(refValue.trim());
-            updateMap.remove(refKey);
-
-            for (Map.Entry<String, String> entry : refAnalyseValue.entrySet()) {
-                if (this.hasSpecialChar(entry.getValue())) {
-                    continue;
-                }
-                updateMap.put(entry.getKey(), entry.getValue());
+            if (this.hasSpecialChar(refValue)) {
+                updateMap.remove(refKey);
             }
         }
     }
@@ -325,7 +319,7 @@ public class LogParser {
 
     //是否含有特殊字符
     public boolean hasSpecialChar(String str) {
-        String regEx = "[`~!@#$%^&*()+=|{}':;',\\\\\\\\]";
+        String regEx = "[`~#^*()+|{}':'/\\\\]";
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(str);
         if(m.find())
