@@ -5,6 +5,7 @@ import com.xingcloud.util.manager.DateManager;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import com.cedarsoftware.util.SafeSimpleDateFormat;
 
 
 /**
@@ -12,14 +13,16 @@ import java.util.*;
  */
 public class Common {
 
+    public static final SafeSimpleDateFormat df = new SafeSimpleDateFormat("yyyyMMddHHmmss");
+    static {
+        df.setTimeZone(DateManager.TZ);
+    }
     /**
      * 把时间戳转换为数据库格式日期
      * 格式：yyyyMMddHHmmss
      * @return
      */
     static public long getLongPresentByTimestamp(long timestamp){
-        SimpleDateFormat df=new SimpleDateFormat("yyyyMMddHHmmss");
-        df.setTimeZone(DateManager.TZ);
         Date date=new Date(timestamp);
         return Long.valueOf(df.format(date));
     }

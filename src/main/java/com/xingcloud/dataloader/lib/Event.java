@@ -1,5 +1,6 @@
 package com.xingcloud.dataloader.lib;
 
+import com.xingcloud.util.Common;
 import com.xingcloud.util.manager.DateManager;
 
 import java.text.SimpleDateFormat;
@@ -82,10 +83,9 @@ public class Event {
     }
 
     public String getDate() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-        df.setTimeZone(DateManager.TZ);
+//        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
         Date date = new Date(timestamp);
-        return df.format(date);
+        return Common.df.format(date);
     }
 
 
