@@ -94,7 +94,7 @@ public class UserPropertyBitmaps {
             .contains(propertyName))) {
       Map<String, Bitmap> project = bitmaps.get(projectID);
       if (project == null) {
-        project = new ConcurrentHashMap<String, Bitmap>();
+        project = new HashMap<String, Bitmap>();
         bitmaps.put(projectID, project);
       }
       String propertyNameIndeed = transferpropertyName(propertyName);
