@@ -298,7 +298,7 @@ public class ProjectInfo {
       long t2 = System.currentTimeMillis();
       LOG.info("get http using:" + (t2 - t1) + "ms");
       JSONObject json = JSONObject.fromObject(getProjectInfoFromMongodb());
-
+      LOG.info( " appid =====1=====" + json);
 
       for (Object keyObj : json.keySet()) {
         if (keyObj instanceof String) {
@@ -330,12 +330,16 @@ public class ProjectInfo {
   static public ProjectInfo getProjectInfoFromAppidOrProject(String appid) {
     try {
 
+      LOG.info( " appid =====1=====" + appid);
       if (appidSet == null || projectSet == null) {
         initProjectAndAppid();
       }
 
-      if (appid_pid_relationship.containsKey(appid))
+      if (appid_pid_relationship.containsKey(appid)) {
         return appid_pid_relationship.get(appid);
+      }else{
+        LOG.info( " appid =====2=====" + appid);
+      }
 
       //special appid for v9
       if (appid.startsWith("v9@337") || appid.startsWith("v9@elex337")) {
