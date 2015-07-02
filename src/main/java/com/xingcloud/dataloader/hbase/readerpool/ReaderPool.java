@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import com.cedarsoftware.util.SafeSimpleDateFormat;
+
 
 /**
  * Author: qiujiawei
@@ -19,7 +21,7 @@ public class ReaderPool {
     public static final Log LOG = LogFactory.getLog(ReaderPool.class);
     public static final int ThreadPoolMaxTime=2*3600;
 
-    private static final SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    private static final SafeSimpleDateFormat df = new SafeSimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
 //        protected SubmitThreadPool threadPool;
 
