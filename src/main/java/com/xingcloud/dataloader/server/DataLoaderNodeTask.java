@@ -228,6 +228,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       String[] largeProjects = new String[]{"age","delta-homes","security-protection","22find","sof-installer","searchprotect","sweet-page",
               "sof-wpm","sof-zip","quick-start","sof-ient","sof-isafe","mystartsearch","v9","webssearches","sof-yacnvd","infospace","omiga-plus"};
 
+    LOG.info("=========================");
       for(String project: largeProjects){
           if(projectSet.contains(project)){
               //  TablePut tablePut = tablePutPool.getTablePut(project, date, index);
@@ -235,6 +236,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
               List<String> v4Logs = v4LogsMaps.get(project) == null ? new ArrayList<String>() : v4LogsMaps.get(project);
               ReaderTask readerTask = new ReaderTask(project, appids, tablePutPool, date, index, v4Logs);
               readerPool.submit(readerTask);
+            LOG.info("=============22="+project+"===========");
               finishProjectSet.add(project);
               projectSet.remove(project);
           }
