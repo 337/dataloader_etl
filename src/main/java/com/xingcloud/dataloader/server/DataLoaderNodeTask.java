@@ -225,7 +225,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
     }
 
     //特殊处理，将处理时间长的项目排在前面
-    String[] largeProjects = new String[]{"age","delta-homes","security-protection","22find","sof-installer","searchprotect","sweet-page",
+    String[] largeProjects = new String[]{"cok","cokfb","age","delta-homes","security-protection","22find","sof-installer","searchprotect","sweet-page",
             "sof-wpm","sof-zip","quick-start","sof-ient","sof-isafe","mystartsearch","v9","webssearches","sof-yacnvd","infospace","omiga-plus"};
 
     for(String project: largeProjects){
