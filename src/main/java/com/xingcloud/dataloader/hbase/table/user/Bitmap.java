@@ -19,7 +19,7 @@ public class Bitmap {
 
   private long lower = -1l; //a reference value, decide if expand to lower or expand to upper
 
-  private BloomFilter<Long> bloomFilter = new BloomFilter<Long>((int)MAX_LENGTH, 500000);
+  private BloomFilter<Long> bloomFilter = new BloomFilter<Long>((int)MAX_LENGTH, 100000);
 
   public boolean get(long id) {
     return bloomFilter.contains(id);
