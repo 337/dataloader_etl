@@ -85,7 +85,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
 
   public void run() {
-      //todo: simplify the code
+    //todo: simplify the code
     try {
       String publicIp = NetManager.getPublicIp();
       String siteIp = NetManager.getSiteLocalIp();
@@ -94,7 +94,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
       //存储mongodb启动记录
       DBObject beginObject = new BasicDBObject();
-        //todo: hostname is better than ip address?
+      //todo: hostname is better than ip address?
       beginObject.put("public_ip", publicIp);
       beginObject.put("inet_ip", siteIp);
       beginObject.put("date", date);
@@ -117,7 +117,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
       long t_v4 = System.currentTimeMillis();
       Map<String, List<String>> v4LogsMaps = readV4LogFillV4Task();
       LOG.info("read all v4log using " + (System.currentTimeMillis() - t_v4) + " ms.v4 pid size:" + v4LogsMaps.size());
-      LOG.info("========1=df================");
+
 
       //12的倍数次项目清空bitmap的lastlogintime
       if (index % 12 == 0) {
@@ -125,7 +125,6 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
         for (String project : projectAppidMatch.keySet())
           UserPropertyBitmaps.getInstance().resetPropertyMap(project, User.lastLoginTimeField);
       }
-      LOG.info("========1====tytytyt=============");
       //48的倍数清空 platformField，  versionField，identifierField，languageField
       if ((index + 1) % 48 == 0) {
         String[] resetProperties = new String[]{User.platformField, User.versionField, User.identifierField,
@@ -137,7 +136,6 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
         }
       }
 
-      LOG.info("========asdfasdf=================");
 
       //读取所有的日志并存储到中间类TablePut中去,并flush到本地
       //todo: tablePutPool -> local variable in buildProjectTablePut()
@@ -210,13 +208,11 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
    */
   private boolean buildProjectTablePut(TablePutPool tablePutPool, Map<String, List<String>> projectAppidMatch, Map<String, List<String>> v4LogsMaps)
           throws Exception {
-    LOG.info("========1=================");
     ReaderPool readerPool = new ReaderPool();
     Set<String> projectSet = new HashSet<String>();
-    LOG.info("========4=================" + projectSet.size());
     projectSet.addAll(projectAppidMatch.keySet());
     projectSet.addAll(v4LogsMaps.keySet());
-    LOG.info("========3================="+ projectSet.size());
+
     //临时忽略对项目gbanner的处理
     LOG.info("temporarily ignore project: gbanner");
     projectSet.remove("gbanner");
@@ -224,27 +220,25 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
     projectSet.remove("newtabv3-bg");
     projectSet.remove("sof-windowspm");
 
-      for(String pid : StaticConfig.invalidpids){
-          projectSet.remove(pid);
-      }
+    for(String pid : StaticConfig.invalidpids){
+      projectSet.remove(pid);
+    }
 
-      //特殊处理，将处理时间长的项目排在前面
-      String[] largeProjects = new String[]{"age","delta-homes","security-protection","22find","sof-installer","searchprotect","sweet-page",
-              "sof-wpm","sof-zip","quick-start","sof-ient","sof-isafe","mystartsearch","v9","webssearches","sof-yacnvd","infospace","omiga-plus"};
+    //特殊处理，将处理时间长的项目排在前面
+    String[] largeProjects = new String[]{"age","delta-homes","security-protection","22find","sof-installer","searchprotect","sweet-page",
+            "sof-wpm","sof-zip","quick-start","sof-ient","sof-isafe","mystartsearch","v9","webssearches","sof-yacnvd","infospace","omiga-plus"};
 
-    LOG.info("=========================" + projectSet.size());
-      for(String project: largeProjects){
-          if(projectSet.contains(project)){
-              //  TablePut tablePut = tablePutPool.getTablePut(project, date, index);
-              List<String> appids = projectAppidMatch.get(project) == null ? new ArrayList<String>() : projectAppidMatch.get(project);
-              List<String> v4Logs = v4LogsMaps.get(project) == null ? new ArrayList<String>() : v4LogsMaps.get(project);
-              ReaderTask readerTask = new ReaderTask(project, appids, tablePutPool, date, index, v4Logs);
-              readerPool.submit(readerTask);
-              LOG.info("=============22="+project+"===========");
-              finishProjectSet.add(project);
-              projectSet.remove(project);
-          }
+    for(String project: largeProjects){
+      if(projectSet.contains(project)){
+        //  TablePut tablePut = tablePutPool.getTablePut(project, date, index);
+        List<String> appids = projectAppidMatch.get(project) == null ? new ArrayList<String>() : projectAppidMatch.get(project);
+        List<String> v4Logs = v4LogsMaps.get(project) == null ? new ArrayList<String>() : v4LogsMaps.get(project);
+        ReaderTask readerTask = new ReaderTask(project, appids, tablePutPool, date, index, v4Logs);
+        readerPool.submit(readerTask);
+        finishProjectSet.add(project);
+        projectSet.remove(project);
       }
+    }
 
     for (String project : projectSet) {
 //      TablePut tablePut = tablePutPool.getTablePut(project, date, index);
@@ -349,7 +343,7 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
 
 
 
-      return appidSet;
+    return appidSet;
   }
 
   public String toString() {
