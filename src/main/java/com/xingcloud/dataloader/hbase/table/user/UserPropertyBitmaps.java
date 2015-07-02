@@ -85,8 +85,10 @@ public class UserPropertyBitmaps {
     if (projectID.equals("sof-newgdp") && propertyName.equals(User.versionField))    //sof-newgdp的version属性暂不做缓存
       return;
     Bitmap bitmap = initPropertyMap(projectID, propertyName);
-    if (bitmap != null)
+    if (bitmap != null) {
       bitmap.set(userID, true);
+      System.out.println(projectID);
+    }
   }
 
   public Bitmap initPropertyMap(String projectID, String propertyName) {

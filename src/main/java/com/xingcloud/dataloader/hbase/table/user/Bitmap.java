@@ -21,22 +21,22 @@ public class Bitmap {
 
   private BloomFilter<Long> bloomFilter = new BloomFilter<Long>((int)MAX_LENGTH, 50000);
 
-  public boolean get(long id) {
-    return bloomFilter.contains(id);
-  }
-
 /*  public boolean get(long id) {
+    return bloomFilter.contains(id);
+  }*/
+
+  public boolean get(long id) {
     if (lower < 0)
       return false;
     int offset = (int) ((id - lower) >> 3);
     return !(offset >= bits.length || offset < 0) && (bits[offset] & masks[((int) (id & 7))]) != 0;
+  }
+
+/*  public void set(long id, boolean is) {
+    bloomFilter.add(id);
   }*/
 
   public void set(long id, boolean is) {
-    bloomFilter.add(id);
-  }
-
-  public void setX(long id, boolean is) {
     if (lower < 0)
       lower = id;    //init  lower
     if (id >= lower && id < lower + (bits.length << 3)) {
@@ -88,7 +88,7 @@ public class Bitmap {
   }
 
   public void reset() {
-//    Arrays.fill(bits, (byte) 0);
-    bloomFilter.clear();
+    Arrays.fill(bits, (byte) 0);
+//    bloomFilter.clear();
   }
 }
