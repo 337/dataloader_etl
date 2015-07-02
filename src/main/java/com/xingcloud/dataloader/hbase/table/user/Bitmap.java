@@ -1,7 +1,6 @@
 package com.xingcloud.dataloader.hbase.table.user;
 
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Random;
 
 /**
@@ -15,15 +14,9 @@ public class Bitmap {
   private static final int[] masks = new int[]{1, 2, 4, 8, 16, 32, 64, 128};
   private static final int[] ormasks = new int[]{0xff - 1, 0xff - 2, 0xff - 4, 0xff - 8, 0xff - 16, 0xff - 32, 0xff - 64, 0xff - 128};
 
-  private long MAX_LENGTH = 8 * 1024 * 1024;// 10M bytes ,80M bits
+  private long MAX_LENGTH = 10 * 1024 * 1024;// 10M bytes ,80M bits
 
   private long lower = -1l; //a reference value, decide if expand to lower or expand to upper
-
-  private BloomFilter<Long> bloomFilter = new BloomFilter<Long>((int)MAX_LENGTH, 50000);
-
-/*  public boolean get(long id) {
-    return bloomFilter.contains(id);
-  }*/
 
   public boolean get(long id) {
     if (lower < 0)
@@ -31,10 +24,6 @@ public class Bitmap {
     int offset = (int) ((id - lower) >> 3);
     return !(offset >= bits.length || offset < 0) && (bits[offset] & masks[((int) (id & 7))]) != 0;
   }
-
-/*  public void set(long id, boolean is) {
-    bloomFilter.add(id);
-  }*/
 
   public void set(long id, boolean is) {
     if (lower < 0)
@@ -89,6 +78,5 @@ public class Bitmap {
 
   public void reset() {
     Arrays.fill(bits, (byte) 0);
-//    bloomFilter.clear();
   }
 }
