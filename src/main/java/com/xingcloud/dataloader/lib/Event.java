@@ -85,7 +85,7 @@ public class Event {
     public String getDate() {
 //        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
         Date date = new Date(timestamp);
-        return Common.df.format(date);
+        return Common.df2.get().format(date);
     }
 
 

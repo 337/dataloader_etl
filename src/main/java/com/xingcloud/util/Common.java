@@ -13,10 +13,22 @@ import com.cedarsoftware.util.SafeSimpleDateFormat;
  */
 public class Common {
 
-    public static final SafeSimpleDateFormat df = new SafeSimpleDateFormat("yyyyMMddHHmmss");
-    static {
-        df.setTimeZone(DateManager.TZ);
-    }
+    static ThreadLocal<SimpleDateFormat> df1 = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+            return df;
+        }
+    };
+
+    public static ThreadLocal<SimpleDateFormat> df2 = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+            return df;
+        }
+    };
+
     /**
      * 把时间戳转换为数据库格式日期
      * 格式：yyyyMMddHHmmss
@@ -24,7 +36,7 @@ public class Common {
      */
     static public long getLongPresentByTimestamp(long timestamp){
         Date date=new Date(timestamp);
-        return Long.valueOf(df.format(date));
+        return Long.valueOf(df1.get().format(date));
     }
 
 
