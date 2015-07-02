@@ -309,7 +309,7 @@ public class RefBitMapRebuild {
         while ((tmpLine = bufferedReader.readLine()) != null) {
           long innerUid = Long.parseLong(tmpLine) & 0xffffffffl;
           for (String property : properties) {
-            UserPropertyBitmaps.getInstance().markPropertyHit(project, innerUid, property);
+//            UserPropertyBitmaps.getInstance().markPropertyHit(project, innerUid, property);
           }
         }
       } catch (FileNotFoundException fnfe) {
