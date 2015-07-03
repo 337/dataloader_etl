@@ -219,14 +219,17 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
     projectSet.remove("newtabv1-bg");
     projectSet.remove("newtabv3-bg");
     projectSet.remove("sof-windowspm");
+    projectSet.remove("sof-yacas");
+    projectSet.remove("searchprotect");
+    projectSet.remove("firefox-searchengine");
 
     for(String pid : StaticConfig.invalidpids){
       projectSet.remove(pid);
     }
 
     //特殊处理，将处理时间长的项目排在前面
-    String[] largeProjects = new String[]{"quick-start","sof-isafe","sof-px","firefox-searchengine","sof-yacnvd","cok","cokfb","age","delta-homes","security-protection","22find","sof-installer","sweet-page",
-            "sof-wpm","sof-zip","sof-ient","mystartsearch","v9","webssearches","infospace","omiga-plus","searchprotect"};
+    String[] largeProjects = new String[]{"sof-px","quick-start","sof-isafe","sof-yacnvd","cok","cokfb","age","delta-homes","security-protection","22find","sof-installer","sweet-page",
+            "sof-wpm","sof-zip","sof-ient","mystartsearch","v9","webssearches","infospace","omiga-plus"};
 
     for(String project: largeProjects){
       if(projectSet.contains(project)){
