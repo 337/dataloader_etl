@@ -219,11 +219,6 @@ public class DataLoaderNodeTask implements Runnable, Comparable<DataLoaderNodeTa
     projectSet.remove("newtabv1-bg");
     projectSet.remove("newtabv3-bg");
     projectSet.remove("sof-windowspm");
-    projectSet.remove("sof-yacas");
-    projectSet.remove("quick-start");
-    projectSet.remove("searchprotect");
-    projectSet.remove("firefox-searchengine");
-    projectSet.remove("sof-px");
 
     for(String pid : StaticConfig.invalidpids){
       projectSet.remove(pid);
