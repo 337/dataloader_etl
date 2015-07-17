@@ -264,13 +264,16 @@ public class RefBitMapRebuild {
         bufferedReader = new BufferedReader(new FileReader(filePath));
         String tmpLine = null;
         while ((tmpLine = bufferedReader.readLine()) != null) {
-          long innerUid = Long.parseLong(tmpLine) & 0xffffffffl;
-          if (innerUid > maxUid) {
+            long innerUid = Long.parseLong(tmpLine) & 0xffffffffl;
+            if (innerUid > maxUid) {
             maxUid = innerUid;
-          }
-          if (innerUid < minUid) {
+            }
+            if (innerUid < minUid) {
             minUid = innerUid;
-          }
+            }
+            for (String property : properties) {
+                UserPropertyBitmaps.getInstance().markPropertyHit(project, innerUid, property);
+            }
         }
       } catch (FileNotFoundException fnfe) {
         LOG.warn(fnfe.getMessage());
@@ -298,7 +301,7 @@ public class RefBitMapRebuild {
     }
 
     //the last...
-    for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
+    /*for (String mysqlHost : UidMappingUtil.getInstance().nodes()) {
       String filePath = Constants.SIXTY_DAYS_ACTIVE_USERS + File.separator + project + "_" + mysqlHost;
       LOG.info(project + " read " + filePath);
 
@@ -325,7 +328,7 @@ public class RefBitMapRebuild {
           }
         }
       }
-    }
+    }*/
 
     LOG.info(project + " rebuild ref,nation,register_time,geoip from local file using " +
       (System.currentTimeMillis() - beginning) + "ms.");

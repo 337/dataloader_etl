@@ -37,7 +37,7 @@ public class UserPropertyBitmaps {
     permittedProjects.add("ddt");
     permittedProjects.add("sof-dsk");
     permittedProjects.add("sof-newgdp");
-    permittedProperties.add("sof-zip");
+    permittedProjects.add("sof-zip");
 
     permittedProperties.add(User.registerField);
     permittedProperties.add(User.firstPayTimeField);
