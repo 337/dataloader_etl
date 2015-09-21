@@ -237,7 +237,7 @@ public class EventMetaTable {
                     for (EventMeta oldMeta : oldEventCache) {
                         MongodbDriver.deleteEvent(project, oldMeta.key, oldMeta._id);
                         oldEventCache.remove(oldMeta.key);
-                        //LOG.info(project + "delete " + Arrays.toString(oldMeta.key) + " for exceedingTotal");
+                        LOG.info(project + "delete " + Arrays.toString(oldMeta.key) + " for exceedingTotal");
                         break;
                     }
                     break;
