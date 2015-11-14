@@ -91,6 +91,9 @@ public class ReaderTask implements Runnable {
           timeList.add(0l);
           continue;
         }
+        if (appid.equals("cok@android_en_1") || appid.equals("cokfb@elex337_en_1")) {
+          continue;
+        }
         long tt1 = System.currentTimeMillis();
         LOG.info("begin to process " + appid);
         processAllFile(null, tablePut, LocalPath.SITE_DATA, appid, date, index);
