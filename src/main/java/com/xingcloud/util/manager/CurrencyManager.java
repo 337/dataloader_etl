@@ -8,9 +8,8 @@ import com.xingcloud.forex.ForexInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
 /**
  * Author: qiujiawei ,ivy
@@ -30,9 +29,10 @@ public class CurrencyManager {
      */
     private void init() throws ForexException, XCacheException {
         rateMap.clear();
-        Set<ForexInfo> rates = ForexGetter.getAll();
+        /*Set<ForexInfo> rates = ForexGetter.getAll();
         for (ForexInfo forexInfo : rates)
-            rateMap.put(forexInfo.getCurrency().toLowerCase(), forexInfo.getRate().toString());
+            rateMap.put(forexInfo.getCurrency().toLowerCase(), forexInfo.getRate().toString());*/
+        readExchange(rateMap);
     }
 
     /**
@@ -90,4 +90,30 @@ public class CurrencyManager {
     public static void cleanUp() {
         instance = null;
     }
+
+    public void readExchange(Map<String, String> rateMap) {
+        InputStream exchange_conf = this.getClass().getResourceAsStream("/exchange.properties");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(exchange_conf));
+
+        Properties props = new Properties();
+        try {
+            props.load(reader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Enumeration en = props.propertyNames();
+        while(en.hasMoreElements()) {
+            String k = (String) en.nextElement();
+            String v = props.getProperty(k);
+            rateMap.put(k, v);
+        }
+
+    }
+
+    /*public static void main(String[] args) throws XCacheException, ForexException {
+        Map<String, String> rateMap = new HashMap<String, String>();
+        new CurrencyManager().readExchange(rateMap);
+    }*/
+
 }
