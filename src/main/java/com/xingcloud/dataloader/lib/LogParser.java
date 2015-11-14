@@ -134,7 +134,7 @@ public class LogParser {
         }
       }
       String gross = jsonObject.get("gross").toString();
-      String currency = jsonObject.get("gcurrency").toString();
+      String currency = jsonObject.get("gcurrency").toString().toLowerCase();
 
       event[0] = "pay";
       event[1] = "gross";
