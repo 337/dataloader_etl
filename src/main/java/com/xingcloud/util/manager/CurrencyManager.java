@@ -18,7 +18,7 @@ import java.util.*;
 public class CurrencyManager {
     public static final Log LOG = LogFactory.getLog(DateManager.class);
 
-    private Map<String, String> rateMap = new HashMap<String, String>();
+    private static Map<String, String> rateMap = new HashMap<String, String>();
 
     private CurrencyManager() throws ForexException, XCacheException {
         init();
@@ -106,14 +106,13 @@ public class CurrencyManager {
         while(en.hasMoreElements()) {
             String k = (String) en.nextElement();
             String v = props.getProperty(k);
-            rateMap.put(k, v);
+            rateMap.put(k.toLowerCase(), v);
         }
 
     }
 
-    /*public static void main(String[] args) throws XCacheException, ForexException {
-        Map<String, String> rateMap = new HashMap<String, String>();
-        new CurrencyManager().readExchange(rateMap);
+    /*public static void main(String[] args) throws Exception {
+        System.out.println(new CurrencyManager().getRate("USD"));
     }*/
 
 }
