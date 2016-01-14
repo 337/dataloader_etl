@@ -230,7 +230,7 @@ public class StaticConfig {
         "kd","sof-addlyrics","farm3_meinvz","iobit","fiwhman","sof-pcsuzk","s","v9-mtix","v9-rdm","yac-gdpdl","pt","sof-lol","iappyfarmer",
         "boyojoy","tcg","tibia","default-newtab","mhsj","kongregatetest","xing","mahjongduels","sof-pcf","hk","krlong","yac-updl","pgzs","zhongqinglv",
         "atest","ns","drakensang","menghuan","sof","sof-bp","xlfc-cbnc","monster","kongfu","xlfcmobile","longzhizhaohuan","minigarden","sz-eng","v9-tug",
-        "govome","globososo","sof-newhpnt","lp","v9m","gbanner","ddt-ff"};
+        "globososo","sof-newhpnt","lp","v9m","gbanner","ddt-ff"};
 
 
 }
